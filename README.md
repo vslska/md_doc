@@ -19,4 +19,3 @@ Computer science
 6. Observatory
 7. Networking
 8. Languages
-9. 
