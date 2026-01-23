@@ -9,7 +9,8 @@
  \___/|_.__/|___/_|\__,_|_|\__,_|_| |_|
 ```
 
-Computer science
+
+- Computer science
 0. OS
 1.  IaC
 2. Containers
