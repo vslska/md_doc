@@ -1,4 +1,4 @@
-### Mana
+### Manul
 
 ```shell
        _         _     _ _             
@@ -9,14 +9,12 @@
  \___/|_.__/|___/_|\__,_|_|\__,_|_| |_|
 ```
 
+0. science
+1. operation system
+2. containers and orchestration
+3. infrastructure as code
+4. cloud
+5. git
+-  other
 
-- Computer science
-0. OS
-1.  IaC
-2. Containers
-3. Orchestration
-4. CI-CD
-5. VCS
-6. Observatory
-7. Networking
-8. Languages
+
