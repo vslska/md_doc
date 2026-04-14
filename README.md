@@ -15,6 +15,6 @@
 3. infrastructure as code
 4. cloud
 5. git
--  other
+6. other
 
 
