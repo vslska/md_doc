@@ -1,4 +1,4 @@
-### Manul
+### doc
 
 ```shell
        _         _     _ _             
@@ -15,6 +15,5 @@
 3. infrastructure as code
 4. cloud
 5. git
-6. other
 
 
