@@ -12,4 +12,4 @@ I constantly maintain, expand, and update this repository to ensure all technica
 * **`3.iac` (Infrastructure as Code)** — Practical configuration management using Ansible playbooks and declarative cloud provisioning in Yandex Cloud via Terraform (HCL).
 * **`4.cloud` & `5.git`** — Bootstrapping with Cloud-Init, YC CLI tricks, and Git troubleshooting guides.
 
-*Maintained via Obsidian. Always open to discuss any of these concepts on a technical interview!*
+*Maintained via Obsidian.
