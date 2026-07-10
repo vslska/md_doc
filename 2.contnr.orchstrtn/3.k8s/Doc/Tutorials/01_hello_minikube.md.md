@@ -720,7 +720,8 @@ spec:
       containers:
       - name: agnhost
         image: registry.k8s.io/e2e-test-images/agnhost:2.53
-        args: ["/agnhost", "netexec", "--http-port=8080"]
+        command: ["/agnhost"]
+        args: [netexec", "--http-port=8080"]
         ports:
         - containerPort: 8080
 EOF
