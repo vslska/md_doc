@@ -2,7 +2,7 @@
 
 > 📌 **Цель**: Развернуть первое приложение в minikube, понять базовые команды kubectl, увидеть связь между Pod, Deployment и Service.
 > 
-> **Связь с теорией**: [[02.deployaments]], [[02.service]], [[01.pod]], [[01.k8s_overview.md]]
+> **Связь с теорией**: [[02.deployaments]], [[02.service]], [[01.pod]], [[01.k8s_overview]]
 > 
 > **Время**: 30-45 минут
 
