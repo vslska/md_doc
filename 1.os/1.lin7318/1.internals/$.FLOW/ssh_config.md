@@ -1,11 +1,11 @@
-Техничный (SSH Config)
+# Техничный (SSH Config)
 
  Чтобы не писать дебильные ипишники и грязь не делать в /etc/hosts прописывая туда ипи и имена, батя давай иди в ssh config
 
- `~/.ssh/config` на ноуте:
+ `~/.ssh/config` на хосте:
  
 ```ini
- Host node1
+Host node1
     HostName 192.168.122.10
     User fedora
     IdentityFile ~/.ssh/id_rsa

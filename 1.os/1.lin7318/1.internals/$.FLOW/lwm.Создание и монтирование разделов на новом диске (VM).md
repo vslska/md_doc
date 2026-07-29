@@ -2,9 +2,8 @@
 > [!NOTE] Предполагается:
 >  - Добавлен новый виртуальный диск (например, `/dev/sdb`)
 > - Работаем с `root` или через `sudo`
-> - Используем **Physical Volume → Volume Group → Logical Volume → FS → mount**. Подробнее о [[1. LVM ]]
+> - Используем **Physical Volume → Volume Group → Logical Volume → FS → mount**. Подробнее о [[2.2.lvm]]
 > - Не используется шифрование (LUKS) и не требуется загрузочный раздел
-
 
 
 ## Step 0: Подготовка и проверка
