@@ -2,17 +2,17 @@
 
 Подавляющее большинство логов в Linux хранится в директории `/var/log/`. Доступ к большинству из них требует прав суперпользователя (`sudo`).
 
-|Путь к файлу|Описание|
-|---|---|
-|`/var/log/syslog` (Debian/Ubuntu)|Общие системные сообщения ядра и служб.|
-|`/var/log/messages` (RHEL/CentOS/Fedora)|Аналог `syslog` для систем Red Hat.|
-|`/var/log/auth.log` (Debian/Ubuntu)|Логи аутентификации, попытки входа (SSH, sudo).|
-|`/var/log/secure` (RHEL/CentOS)|Аналог `auth.log` для систем Red Hat.|
-|`/var/log/kern.log`|Сообщения ядра (kernel) и данные о работе оборудования.|
-|`/var/log/dmesg`|Буфер сообщений ядра, записанных при загрузке системы.|
-|`/var/log/apache2/` или `/var/log/nginx/`|Логи веб-серверов (access.log, error.log).|
-|`/var/log/mysql/` или `/var/log/postgresql/`|Логи баз данных.|
-|`/var/log/cloud-init.log`|Логи инициализации облачных инстансов (AWS, Azure, GCP).|
+| Путь к файлу                                 | Описание                                                 |
+| -------------------------------------------- | -------------------------------------------------------- |
+| `/var/log/syslog` (Debian/Ubuntu)            | Общие системные сообщения ядра и служб.                  |
+| `/var/log/messages` (RHEL/CentOS/Fedora)     | Аналог `syslog` для систем Red Hat.                      |
+| `/var/log/auth.log` (Debian/Ubuntu)          | Логи аутентификации, попытки входа (SSH, sudo).          |
+| `/var/log/secure` (RHEL/CentOS)              | Аналог `auth.log` для систем Red Hat.                    |
+| `/var/log/kern.log`                          | Сообщения ядра (kernel) и данные о работе оборудования.  |
+| `/var/log/dmesg`                             | Буфер сообщений ядра, записанных при загрузке системы.   |
+| `/var/log/apache2/` или `/var/log/nginx/`    | Логи веб-серверов (access.log, error.log).               |
+| `/var/log/mysql/` или `/var/log/postgresql/` | Логи баз данных.                                         |
+| `/var/log/cloud-init.log`                    | Логи инициализации облачных инстансов (AWS, Azure, GCP). |
 
 ## 2.Утилиты просмотра логов
 
