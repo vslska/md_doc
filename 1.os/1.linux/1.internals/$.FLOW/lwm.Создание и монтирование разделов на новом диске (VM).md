@@ -95,7 +95,7 @@ mount | grep mnt
 |                               |                                                                                    |
 | ----------------------------- | ---------------------------------------------------------------------------------- |
 | Расширить LV (на 10G)         | `sudo lvextend -L+10G /dev/vg_data/lv_home && sudo resize2fs /dev/vg_data/lv_home` |
-| Расширить LV на всё свободное | `sudo lvextend -l+100%FREE /dev/vg_data/lv_media && sudo xfs_growfs /mnt/media`    |
+| Расширить LV на всё свободное | `sudo lvextend -l +100%FREE /dev/vg_data/lv_media && sudo xfs_growfs /mnt/media`   |
 | Добавить диск в VG            | `sudo pvcreate /dev/sdc && sudo vgextend vg_data /dev/sdc`                         |
 | Просмотр структуры            | `sudo pvs`, `vgs`, `lvs`, `lsblk`, `ls -la /dev/mapper/`                           |
 | Удалить всё (осторожно!)      | `vgremove vg_data`, `pvremove /dev/sdb`                                            |
