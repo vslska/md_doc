@@ -1,1008 +1,861 @@
-# Bash — шпаргалка
+# Bash: академическое практическое руководство
 
-> Практическая шпаргалка по Bash: от базового синтаксиса до рабочих скриптов.
-> 
-> Цель: знать конструкции, которые покрывают большую часть повседневной автоматизации Linux/macOS.
-
----
-
-# Содержание
-
-[[#1. Запуск Bash-скрипта]]
-[[#2. Комментарии]]
-[[#3. Вывод]]
-[[#4. Переменные]]
-[[#5. Кавычки]]
-[[#6. Спецпеременные]]
-[[#7. Команды внутри переменных]]
-[[#8. Математика]]
-[[#9. Условия if]]
-[[#10. Проверка файлов]]
-[[#11. Сравнение строк]]
-[[#12. Сравнение чисел]]
-[[#13. case]]
-[[#14. Цикл for]]
-[[#15. Цикл while]]
-[[#16. Чтение файла построчно]]
-[[#17. break / continue]]
-[[#18. Функции]]
-[[#19. Аргументы скрипта]]
-[[#20. getopts]]
-[[#21. Массивы]]
-[[#22. Ассоциативные массивы]]
-[[#23. Строки]]
-[[#24. Параметры по умолчанию]]
-[[#25. Код возврата]]
-[[#26. set -euo pipefail]]
-[[#27. Перенаправление]]
-[[#28. Pipeline]]
-[[#29. grep]]
-[[#30. find]]
-[[#31. find + действия]]
-[[#32. sed]]
-[[#33. awk]]
-[[#34. sort / uniq / wc]]
-[[#35. cut / tr]]
-[[#36. xargs]]
-[[#37. Here Document]]
-[[#38. Временные файлы]]
-[[#39. trap]]
-[[#40. Логи]]
-[[#41. Проверка команд]]
-[[#42. Процессы]]
-[[#43. Фоновые процессы]]
-[[#44. SSH]]
-[[#45. scp / rsync]]
-[[#46. tar]]
-[[#47. curl]]
-[[#48. jq]]
-[[#49. Cron]]
-[[#50. systemd]]
-[[#51. Отладка]]
-[[#52. ShellCheck]]
-[[#53. Безопасный Bash]]
-[[#54. Практический шаблон Bash-скрипта]]
-[[#55. Проверка сервиса]]
-[[#56. Проверка URL]]
-[[#57. Проверка диска]]
-[[#58. Backup]]
-[[#59. Backup + удаление старых файлов]]
-[[#60. Обработка всех файлов]]
-[[#61. Поиск больших файлов]]
-[[#62. Поиск ошибок в логах]]
-[[#63. Самые частые ошибки]]
-[[#64. Проверка нескольких серверов]]
-[[#65. Выполнить команду на нескольких серверах]]
-[[#66. Lock от повторного запуска]]
-[[#67. Ограничение времени]]
-[[#68. Process substitution]]
-[[#70. Git из Bash]]
-[[#71. Deploy-скрипт]]
-[[#72. Bash + JSON API]]
-[[#73. Bash + SQL]]
-[[#74. Чего НЕ стоит делать]]
-[[#75. Мини-справочник операторов]]
-[[#76. Самые полезные конструкции — в одном месте]]
-[[#77. Универсальный шаблон скрипта]]
-[[#78. Что выучить в первую очередь]]
-[[#79. Ментальная модель Bash]]
-[[#80. Практический порядок изучения]]
-[[#81. Главный принцип Bash]]
-[[#82. Финальный чеклист перед запуском скрипта]]
-[[#83. Самая короткая шпаргалка]]
-[[#84. Золотые правила Bash]]
-[[#85. Минимальный набор для 90% задач]]
-[[#Итог]]
-
+> **Версия документа:** 1.0  
+> **Назначение:** систематическое изучение Bash от основ shell до разработки надёжных production-скриптов.  
+> **Охват:** Bash 5.x как основной ориентир; отдельно отмечены особенности переносимости между Linux, macOS и разными версиями Bash.
 
 ---
 
-# 1. Запуск Bash-скрипта
+## Содержание
 
-Файл:
+1. [Что такое Bash](#1-что-такое-bash)
+2. [Версии и совместимость](#2-версии-и-совместимость)
+3. [Запуск скриптов](#3-запуск-скриптов)
+4. [Комментарии, команды и exit status](#4-комментарии-команды-и-exit-status)
+5. [Переменные и окружение](#5-переменные-и-окружение)
+6. [Кавычки и разбор команд](#6-кавычки-и-разбор-команд)
+7. [Подстановки и расширения](#7-подстановки-и-расширения)
+8. [Специальные параметры и аргументы](#8-специальные-параметры-и-аргументы)
+9. [Условия: `test`, `[ ]`, `[[ ]]`](#9-условия-test---)
+10. [Арифметика](#10-арифметика)
+11. [Массивы](#11-массивы)
+12. [Строки и parameter expansion](#12-строки-и-parameter-expansion)
+13. [Globbing](#13-globbing)
+14. [Управляющие конструкции](#14-управляющие-конструкции)
+15. [Функции](#15-функции)
+16. [Потоки, pipeline и файловые дескрипторы](#16-потоки-pipeline-и-файловые-дескрипторы)
+17. [Here documents, here strings и process substitution](#17-here-documents-here-strings-и-process-substitution)
+18. [Подshell и группировка команд](#18-подshell-и-группировка-команд)
+19. [Фоновые процессы и job control](#19-фоновые-процессы-и-job-control)
+20. [Сигналы и `trap`](#20-сигналы-и-trap)
+21. [`set`, `shopt` и режимы Bash](#21-set-shopt-и-режимы-bash)
+22. [Обработка ошибок](#22-обработка-ошибок)
+23. [CLI-интерфейсы и `getopts`](#23-cli-интерфейсы-и-getopts)
+24. [Работа с файлами и каталогами](#24-работа-с-файлами-и-каталогами)
+25. [Текстовые утилиты](#25-текстовые-утилиты)
+26. [`find` и `xargs`](#26-find-и-xargs)
+27. [Процессы](#27-процессы)
+28. [Права и безопасность](#28-права-и-безопасность)
+29. [SSH, rsync и tar](#29-ssh-rsync-и-tar)
+30. [HTTP, JSON и API](#30-http-json-и-api)
+31. [Git из Bash](#31-git-из-bash)
+32. [Cron, systemd и launchd](#32-cron-systemd-и-launchd)
+33. [Временные файлы, блокировки и timeout](#33-временные-файлы-блокировки-и-timeout)
+34. [Логирование](#34-логирование)
+35. [Отладка и статический анализ](#35-отладка-и-статический-анализ)
+36. [Переносимость Linux/macOS](#36-переносимость-linuxmacos)
+37. [Производительность](#37-производительность)
+38. [Антипаттерны](#38-антипаттерны)
+39. [Production-шаблон](#39-production-шаблон)
+40. [Тестирование и идемпотентность](#40-тестирование-и-идемпотентность)
+41. [Когда Bash перестаёт быть подходящим инструментом](#41-когда-bash-перестаёт-быть-подходящим-инструментом)
+42. [Краткий справочник](#42-краткий-справочник)
+
+---
+
+# 1. Что такое Bash
+
+**Bash (Bourne Again SHell)** — командный интерпретатор и язык сценариев семейства Unix. Он используется одновременно как:
+
+- интерактивная оболочка;
+- интерпретатор shell-скриптов;
+- средство композиции Unix-команд;
+- язык автоматизации;
+- инструмент системного администрирования и orchestration.
+
+Важно различать **Bash** и **Unix/GNU utilities**. Bash предоставляет shell-язык, расширения, переменные, функции, условия, циклы, job control и т. д. Утилиты `grep`, `sed`, `awk`, `find`, `tar`, `curl`, `jq`, `rsync` и `git` являются отдельными программами.
+
+---
+
+# 2. Версии и совместимость
+
+Проверка версии:
+
+```bash
+bash --version
+echo "$BASH_VERSION"
+```
+
+Возможности Bash зависят от версии. Ассоциативные массивы требуют Bash 4.0+.
+
+## macOS
+
+Системный Bash в старых версиях macOS — Bash 3.2. Поэтому скрипт, использующий возможности Bash 4/5, должен либо явно требовать современный Bash, либо учитывать совместимость.
+
+Проверка:
+
+```bash
+command -v bash
+bash --version
+```
+
+Если нужна конкретная версия, shebang:
+
+```bash
+#!/usr/bin/env bash
+```
+
+не гарантирует конкретную версию — он выбирает `bash` из `PATH`.
+
+## GNU и BSD
+
+Даже если shell один и тот же, утилиты могут различаться.
+
+Например, `sed -i` имеет различия между GNU `sed` и BSD/macOS `sed`.
+
+Поэтому переносимость следует рассматривать на двух уровнях:
+
+1. совместимость Bash;
+2. совместимость внешних Unix-утилит.
+
+---
+
+# 3. Запуск скриптов
+
+Минимальный скрипт:
 
 ```bash
 #!/usr/bin/env bash
 
-echo "Hello"
+printf '%s\n' "Hello, Bash"
 ```
 
-Сделать исполняемым:
+Права:
 
 ```bash
 chmod +x script.sh
 ```
 
-Запустить:
+Запуск:
 
 ```bash
 ./script.sh
 ```
 
-Или:
+или:
 
 ```bash
 bash script.sh
 ```
 
+Это не полностью эквивалентные способы.
+
+`./script.sh` использует shebang, а:
+
+```bash
+bash script.sh
+```
+
+явно запускает файл интерпретатором `bash`.
+
+Проверка синтаксиса без запуска:
+
+```bash
+bash -n script.sh
+```
+
 ---
 
-# 2. Комментарии
+# 4. Комментарии, команды и exit status
 
-Однострочный комментарий:
+Комментарий начинается с `#`:
 
 ```bash
 # Это комментарий
+printf '%s\n' "hello"
 ```
 
-Пример:
+Каждая команда имеет **exit status** — целое число от 0 до 255.
+
+По соглашению:
+
+```text
+0     успех
+!= 0  ошибка или специальное состояние
+```
+
+Проверка:
 
 ```bash
-#!/usr/bin/env bash
-
-# Создаём каталог
-mkdir -p backup
+some_command
+status=$?
+printf 'status=%s\n' "$status"
 ```
+
+Условие часто проверяется непосредственно:
+
+```bash
+if some_command; then
+    printf '%s\n' "success"
+fi
+```
+
+Не следует без необходимости делать:
+
+```bash
+some_command
+if [[ $? -eq 0 ]]; then
+    ...
+fi
+```
+
+Непосредственная форма обычно яснее.
 
 ---
 
-# 3. Вывод
+# 5. Переменные и окружение
 
-```bash
-echo "Hello"
-```
-
-Лучше для форматированного вывода:
-
-```bash
-printf 'Hello, %s\n' "$name"
-```
-
-Несколько строк:
-
-```bash
-printf '%s\n' \
-    "Line 1" \
-    "Line 2" \
-    "Line 3"
-```
-
----
-
-# 4. Переменные
-
-Создание:
+Присваивание:
 
 ```bash
 name="Alex"
 age=30
 ```
 
-Использование:
+Пробелы вокруг `=` недопустимы:
 
 ```bash
-echo "$name"
-echo "$age"
+# Неправильно
+name = "Alex"
 ```
 
-### Важно
-
-Пробелы вокруг `=` нельзя:
+Локальная переменная shell:
 
 ```bash
-name="Alex"   # правильно
+NAME="Alex"
 ```
+
+Экспорт в окружение дочерних процессов:
 
 ```bash
-name = "Alex" # неправильно
-```
-
-### Константа
-
-```bash
-readonly APP_NAME="myapp"
-```
-
----
-
-# 5. Кавычки
-
-## Двойные кавычки
-
-Переменные раскрываются:
-
-```bash
-name="Alex"
-
-echo "Hello $name"
-```
-
-Результат:
-
-```text
-Hello Alex
-```
-
-## Одинарные кавычки
-
-Переменные не раскрываются:
-
-```bash
-echo 'Hello $name'
-```
-
-Результат:
-
-```text
-Hello $name
-```
-
-## Главное правило
-
-Переменные почти всегда заключай в:
-
-```bash
-"$variable"
-```
-
-Например:
-
-```bash
-rm -- "$file"
-cp "$source" "$destination"
-echo "$name"
-```
-
----
-
-# 6. Спецпеременные
-
-```bash
-$0      # имя скрипта
-$1      # первый аргумент
-$2      # второй аргумент
-$#      # количество аргументов
-$@      # все аргументы
-$?      # код возврата последней команды
-$$      # PID текущего процесса
-$!      # PID последнего фонового процесса
-$HOME   # домашний каталог
-$USER   # текущий пользователь
-$PWD    # текущий каталог
-$PATH   # PATH
-```
-
-Пример:
-
-```bash
-echo "Script: $0"
-echo "Arg 1: $1"
-echo "Args: $#"
-```
-
----
-
-# 7. Команды внутри переменных
-
-Используй:
-
-```bash
-result="$(command)"
-```
-
-Например:
-
-```bash
-current_dir="$(pwd)"
-today="$(date +%F)"
-hostname="$(hostname)"
-```
-
-Пример:
-
-```bash
-echo "Host: $(hostname)"
-echo "Date: $(date +%F)"
-```
-
----
-
-# 8. Математика
-
-В Bash:
-
-```bash
-a=10
-b=20
-
-sum=$((a + b))
-
-echo "$sum"
-```
-
-Операции:
-
-```bash
-a=$((10 + 5))
-a=$((10 - 5))
-a=$((10 * 5))
-a=$((10 / 5))
-a=$((10 % 3))
-```
-
-Увеличить:
-
-```bash
-((counter++))
-```
-
-Уменьшить:
-
-```bash
-((counter--))
-```
-
----
-
-# 9. Условия if
-
-Базовый синтаксис:
-
-```bash
-if [[ condition ]]; then
-    command
-fi
-```
-
-Полный:
-
-```bash
-if [[ condition ]]; then
-    command
-elif [[ another_condition ]]; then
-    command
-else
-    command
-fi
-```
-
-Пример:
-
-```bash
-if [[ "$USER" == "root" ]]; then
-    echo "Ты root"
-else
-    echo "Ты не root"
-fi
-```
-
----
-
-# 10. Проверка файлов
-
-|Проверка|Значение|
-|---|---|
-|`-e`|существует|
-|`-f`|обычный файл|
-|`-d`|каталог|
-|`-r`|доступен для чтения|
-|`-w`|доступен для записи|
-|`-x`|исполняемый|
-|`-s`|не пустой|
-
-Примеры:
-
-```bash
-if [[ -f "$file" ]]; then
-    echo "Файл существует"
-fi
-```
-
-```bash
-if [[ -d "$dir" ]]; then
-    echo "Каталог существует"
-fi
-```
-
-```bash
-if [[ ! -f "$file" ]]; then
-    echo "Файла нет"
-fi
-```
-
----
-
-# 11. Сравнение строк
-
-Равно:
-
-```bash
-if [[ "$name" == "Alex" ]]; then
-    echo "Hello Alex"
-fi
-```
-
-Не равно:
-
-```bash
-if [[ "$name" != "Alex" ]]; then
-    echo "Not Alex"
-fi
-```
-
-Пустая:
-
-```bash
-if [[ -z "$name" ]]; then
-    echo "Empty"
-fi
-```
-
-Не пустая:
-
-```bash
-if [[ -n "$name" ]]; then
-    echo "Not empty"
-fi
-```
-
----
-
-# 12. Сравнение чисел
-
-Лучше использовать:
-
-```bash
-(( ... ))
-```
-
-Пример:
-
-```bash
-a=10
-b=20
-
-if (( a < b )); then
-    echo "a меньше b"
-fi
-```
-
-Операторы:
-
-```text
-==    равно
-!=    не равно
-<     меньше
->     больше
-<=    меньше или равно
->=    больше или равно
-```
-
-Пример:
-
-```bash
-if (( $# < 1 )); then
-    echo "Нужен аргумент"
-    exit 1
-fi
-```
-
----
-
-# 13. case
-
-Когда много вариантов:
-
-```bash
-case "$1" in
-    start)
-        echo "Starting"
-        ;;
-    stop)
-        echo "Stopping"
-        ;;
-    restart)
-        echo "Restarting"
-        ;;
-    *)
-        echo "Unknown command"
-        exit 1
-        ;;
-esac
-```
-
-Использование:
-
-```bash
-./app.sh start
-./app.sh stop
-./app.sh restart
-```
-
----
-
-# 14. Цикл for
-
-Простой:
-
-```bash
-for item in one two three; do
-    echo "$item"
-done
-```
-
-Числа:
-
-```bash
-for i in {1..10}; do
-    echo "$i"
-done
-```
-
-С шагом:
-
-```bash
-for i in {0..20..2}; do
-    echo "$i"
-done
-```
-
-Файлы:
-
-```bash
-for file in *.txt; do
-    echo "$file"
-done
-```
-
-Аргументы:
-
-```bash
-for arg in "$@"; do
-    echo "$arg"
-done
-```
-
----
-
-# 15. Цикл while
-
-```bash
-counter=1
-
-while (( counter <= 5 )); do
-    echo "$counter"
-    ((counter++))
-done
-```
-
----
-
-# 16. Чтение файла построчно
-
-Правильный базовый вариант:
-
-```bash
-while IFS= read -r line; do
-    echo "$line"
-done < file.txt
-```
-
-Почему `IFS=` и `-r`:
-
-- сохраняются пробелы;
-    
-- не обрабатывается `\` как escape.
-    
-
----
-
-# 17. break / continue
-
-`break` — выйти из цикла:
-
-```bash
-for i in {1..10}; do
-    if (( i == 5 )); then
-        break
-    fi
-
-    echo "$i"
-done
-```
-
-`continue` — перейти к следующей итерации:
-
-```bash
-for i in {1..10}; do
-    if (( i % 2 == 0 )); then
-        continue
-    fi
-
-    echo "$i"
-done
-```
-
-Результат:
-
-```text
-1
-3
-5
-7
-9
-```
-
----
-
-# 18. Функции
-
-Создание:
-
-```bash
-hello() {
-    echo "Hello"
-}
-```
-
-Вызов:
-
-```bash
-hello
-```
-
-Аргументы:
-
-```bash
-greet() {
-    local name="$1"
-
-    echo "Hello, $name"
-}
-
-greet "Alex"
-```
-
-### `local`
-
-Всегда старайся использовать:
-
-```bash
-local variable="value"
-```
-
-внутри функции.
-
----
-
-# 19. Аргументы скрипта
-
-Скрипт:
-
-```bash
-#!/usr/bin/env bash
-
-echo "First: $1"
-echo "Second: $2"
-```
-
-Запуск:
-
-```bash
-./script.sh hello world
-```
-
-Все аргументы:
-
-```bash
-for arg in "$@"; do
-    echo "$arg"
-done
-```
-
-Количество:
-
-```bash
-echo "$#"
+export NAME="Alex"
 ```
 
 Проверка:
 
 ```bash
-if (( $# != 2 )); then
-    echo "Usage: $0 <source> <destination>"
-    exit 1
-fi
+printf '%s\n' "$NAME"
+env
+printenv
+```
+
+Локальная переменная функции:
+
+```bash
+greet() {
+    local name="$1"
+    printf 'Hello, %s\n' "$name"
+}
+```
+
+Константа:
+
+```bash
+readonly APP_NAME="myapp"
+```
+
+Удаление:
+
+```bash
+unset NAME
+```
+
+Проверка наличия команды:
+
+```bash
+command -v bash
+command -v jq
 ```
 
 ---
 
-# 20. getopts
+# 6. Кавычки и разбор команд
 
-Для параметров вида:
+Кавычки — фундаментальная тема Bash.
+
+## Двойные кавычки
 
 ```bash
-./script.sh -v -f file.txt
+name="Alex"
+printf '%s\n' "$name"
 ```
 
-Пример:
+Переменная раскрывается, но word splitting и pathname expansion внутри двойных кавычек не выполняются.
+
+## Одинарные кавычки
 
 ```bash
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-verbose=false
-file=""
-
-while getopts "vf:" opt; do
-    case "$opt" in
-        v)
-            verbose=true
-            ;;
-        f)
-            file="$OPTARG"
-            ;;
-        *)
-            echo "Usage: $0 [-v] -f file"
-            exit 1
-            ;;
-    esac
-done
-
-echo "file=$file"
-echo "verbose=$verbose"
+printf '%s\n' '$HOME'
 ```
 
----
+Содержимое трактуется буквально.
 
-# 21. Массивы
+## Главное правило
 
-Создание:
-
-```bash
-servers=("web1" "web2" "web3")
-```
-
-Получить элемент:
+Практически всегда:
 
 ```bash
-echo "${servers[0]}"
-```
-
-Все элементы:
-
-```bash
-printf '%s\n' "${servers[@]}"
-```
-
-Количество:
-
-```bash
-echo "${#servers[@]}"
-```
-
-Добавить:
-
-```bash
-servers+=("web4")
-```
-
-Цикл:
-
-```bash
-for server in "${servers[@]}"; do
-    echo "$server"
-done
-```
-
-### Важно
-
-Используй:
-
-```bash
-"${array[@]}"
+"$variable"
 ```
 
 а не:
 
 ```bash
-$array
+$variable
+```
+
+Например:
+
+```bash
+file="my document.txt"
+cat "$file"
+```
+
+Без кавычек shell может разделить значение по пробелам.
+
+---
+
+# 7. Подстановки и расширения
+
+Bash выполняет несколько видов expansion.
+
+## Command substitution
+
+```bash
+current_dir="$(pwd)"
+today="$(date +%F)"
+```
+
+Старый синтаксис:
+
+```bash
+`pwd`
+```
+
+не рекомендуется; используйте `$(...)`.
+
+## Arithmetic expansion
+
+```bash
+a=10
+b=20
+sum=$((a + b))
+```
+
+## Parameter expansion
+
+```bash
+name="${NAME:-Guest}"
+```
+
+## Tilde expansion
+
+```bash
+cd ~/projects
+```
+
+## Pathname expansion (globbing)
+
+```bash
+echo *.txt
 ```
 
 ---
 
-# 22. Ассоциативные массивы
+# 8. Специальные параметры и аргументы
+
+Основные параметры:
+
+| Параметр | Значение |
+|---|---|
+| `$0` | имя/путь запускаемого скрипта |
+| `$1`, `$2`, ... | позиционные аргументы |
+| `$#` | количество позиционных аргументов |
+| `"$@"` | позиционные аргументы как отдельные слова |
+| `"$*"` | позиционные аргументы, объединённые в одно расширение |
+| `$?` | status предыдущей команды |
+| `$$` | PID текущего shell-процесса |
+| `$!` | PID последнего фонового процесса |
+| `$-` | текущие shell options |
+| `$?` | exit status последней команды |
+
+### `$@` и `$*`
+
+Предпочтительная передача всех аргументов:
+
+```bash
+for arg in "$@"; do
+    printf '<%s>\n' "$arg"
+done
+```
+
+`"$@"` сохраняет границы аргументов.
+
+`"$*"` обычно объединяет их в одну строку с первым символом `IFS`.
+
+### `!$`
+
+Не путать:
+
+```bash
+$!
+```
+
+с:
+
+```bash
+!$
+```
+
+`$!` — PID последнего background-процесса.
+
+`!$` — history expansion в интерактивном Bash и не является обычной переменной shell-скрипта.
+
+---
+
+# 9. Условия: `test`, `[ ]`, `[[ ]]`
+
+Для современного Bash предпочтительна конструкция:
+
+```bash
+if [[ condition ]]; then
+    ...
+fi
+```
+
+## Строки
+
+```bash
+[[ "$a" == "$b" ]]
+[[ "$a" != "$b" ]]
+[[ -z "$a" ]]
+[[ -n "$a" ]]
+```
+
+## Файлы
+
+| Оператор | Значение |
+|---|---|
+| `-e` | существует |
+| `-f` | обычный файл |
+| `-d` | каталог |
+| `-r` | доступен для чтения |
+| `-w` | доступен для записи |
+| `-x` | исполняемый |
+| `-s` | размер больше нуля |
+| `-L` | symbolic link |
+
+Пример:
+
+```bash
+if [[ -f "$file" ]]; then
+    printf '%s\n' "File exists"
+fi
+```
+
+## Числа
+
+В Bash:
+
+```bash
+if (( a < b )); then
+    ...
+fi
+```
+
+Не следует использовать `[[ a < b ]]` как числовое сравнение.
+
+## `[[ ]]` против `[ ]`
+
+`[[ ]]` — Bash-конструкция с более безопасной и богатой семантикой.
+
+`[ ]` — команда `test`/её синтаксическая форма, более близкая к POSIX shell.
+
+---
+
+# 10. Арифметика
+
+Bash поддерживает целочисленную арифметику.
+
+```bash
+a=10
+b=3
+
+printf '%s\n' "$((a + b))"
+printf '%s\n' "$((a - b))"
+printf '%s\n' "$((a * b))"
+printf '%s\n' "$((a / b))"
+printf '%s\n' "$((a % b))"
+```
+
+Арифметический контекст:
+
+```bash
+((counter++))
+((counter += 10))
+
+if (( counter >= 100 )); then
+    ...
+fi
+```
+
+Bash не является языком для произвольной точной арифметики с плавающей точкой. Для неё обычно используют `awk`, `bc`, Python и т. п.
+
+---
+
+# 11. Массивы
+
+## Индексированный массив
+
+```bash
+servers=("web1" "web2" "web3")
+
+printf '%s\n' "${servers[0]}"
+printf '%s\n' "${servers[@]}"
+printf '%s\n' "${#servers[@]}"
+
+servers+=("web4")
+```
+
+Итерация:
+
+```bash
+for server in "${servers[@]}"; do
+    printf '%s\n' "$server"
+done
+```
+
+## Ассоциативный массив
+
+Требует Bash 4+:
 
 ```bash
 declare -A ports
 
 ports[ssh]=22
 ports[http]=80
-ports[https]=443
-```
 
-Получить:
-
-```bash
-echo "${ports[https]}"
-```
-
-Перебрать:
-
-```bash
 for service in "${!ports[@]}"; do
-    echo "$service -> ${ports[$service]}"
+    printf '%s -> %s\n' \
+        "$service" \
+        "${ports[$service]}"
 done
+```
+
+## `[@]` и `[*]`
+
+В двойных кавычках:
+
+```bash
+"${array[@]}"
+```
+
+раскрывает элементы массива как отдельные слова.
+
+```bash
+"${array[*]}"
+```
+
+объединяет элементы в одно слово с разделителем `IFS`.
+
+Для передачи элементов массива обычно используйте:
+
+```bash
+"${array[@]}"
 ```
 
 ---
 
-# 23. Строки
-
-```bash
-text="Hello World"
-```
+# 12. Строки и parameter expansion
 
 Длина:
 
 ```bash
-echo "${#text}"
+text="Hello Bash"
+printf '%s\n' "${#text}"
 ```
 
-Замена:
+Замена первого совпадения:
 
 ```bash
-echo "${text/World/Bash}"
+printf '%s\n' "${text/World/Bash}"
 ```
 
-Заменить все:
+Замена всех:
 
 ```bash
-echo "${text//World/Bash}"
+printf '%s\n' "${text//World/Bash}"
 ```
 
-Начинается с:
+Удаление префикса:
 
 ```bash
-[[ "$text" == Hello* ]]
+"${path#*/}"
+"${path##*/}"
 ```
 
-Заканчивается:
+Удаление суффикса:
 
 ```bash
-[[ "$text" == *World ]]
+"${file%.txt}"
+"${file%%.tar.gz}"
 ```
 
-Убрать расширение:
+Подстрока:
 
 ```bash
-file="report.txt"
-
-name="${file%.txt}"
+"${text:0:5}"
 ```
 
-Получить имя файла:
+Значение по умолчанию:
 
 ```bash
-path="/home/user/file.txt"
-
-basename="${path##*/}"
+"${name:-Guest}"
 ```
 
-Результат:
-
-```text
-file.txt
-```
-
----
-
-# 24. Параметры по умолчанию
-
-Если переменная не задана или пустая:
+Назначение значения по умолчанию:
 
 ```bash
-name="${NAME:-Guest}"
+"${name:=Guest}"
 ```
 
-Если переменная не задана — ошибка:
+Использовать альтернативу:
+
+```bash
+"${name:+defined}"
+```
+
+Ошибка, если переменная отсутствует/пуста:
 
 ```bash
 : "${API_TOKEN:?API_TOKEN is required}"
 ```
 
-Проверить:
-
-```bash
-if [[ -z "${API_TOKEN:-}" ]]; then
-    echo "API_TOKEN не задан"
-    exit 1
-fi
-```
-
 ---
 
-# 25. Код возврата
+# 13. Globbing
 
-В Unix:
+Основные шаблоны:
 
-```text
-0     успех
-!= 0  ошибка
+```bash
+*
+?
+[abc]
+[a-z]
+[^a]
 ```
 
 Пример:
 
 ```bash
-ls /tmp
-
-echo "$?"
+for file in *.log; do
+    printf '%s\n' "$file"
+done
 ```
 
-Проверка:
+## `nullglob`
+
+По умолчанию при отсутствии совпадений:
 
 ```bash
-if command; then
-    echo "OK"
+*.log
+```
+
+может остаться буквальным шаблоном.
+
+Безопаснее:
+
+```bash
+shopt -s nullglob
+files=( *.log )
+```
+
+## `globstar`
+
+Рекурсивный glob:
+
+```bash
+shopt -s globstar
+
+for file in **/*.txt; do
+    ...
+done
+```
+
+## `dotglob`
+
+Позволяет glob-выражениям учитывать скрытые файлы:
+
+```bash
+shopt -s dotglob
+```
+
+Изменение `shopt` следует делать осознанно: поведение globbing становится частью контракта скрипта.
+
+---
+
+# 14. Управляющие конструкции
+
+## `if`
+
+```bash
+if [[ -f "$file" ]]; then
+    printf '%s\n' "file"
+elif [[ -d "$file" ]]; then
+    printf '%s\n' "directory"
 else
-    echo "ERROR"
+    printf '%s\n' "missing"
 fi
 ```
 
-Или:
+## `case`
 
 ```bash
-if ! command; then
-    echo "Ошибка" >&2
-    exit 1
-fi
+case "${1:-}" in
+    start)
+        start_service
+        ;;
+    stop)
+        stop_service
+        ;;
+    restart)
+        restart_service
+        ;;
+    *)
+        printf 'Usage: %s {start|stop|restart}\n' "$0" >&2
+        exit 2
+        ;;
+esac
+```
+
+## `for`
+
+```bash
+for item in one two three; do
+    printf '%s\n' "$item"
+done
+```
+
+C-style:
+
+```bash
+for ((i = 0; i < 10; i++)); do
+    printf '%s\n' "$i"
+done
+```
+
+## `while`
+
+```bash
+while (( counter < 10 )); do
+    ((counter++))
+done
+```
+
+## `until`
+
+```bash
+until command; do
+    sleep 1
+done
+```
+
+## Чтение файла
+
+Надёжная форма:
+
+```bash
+while IFS= read -r line; do
+    printf '%s\n' "$line"
+done < file.txt
+```
+
+`IFS=` предотвращает удаление ведущих/конечных разделителей, а `-r` запрещает `read` интерпретировать обратные слэши как escape-последовательности.
+
+## Управление циклом
+
+```bash
+break
+continue
 ```
 
 ---
 
-# 26. set -euo pipefail
+# 15. Функции
 
-Для большинства серьёзных скриптов:
-
-```bash
-set -euo pipefail
-```
-
-### `-e`
-
-Остановиться при ошибке.
-
-### `-u`
-
-Ошибка при использовании несуществующей переменной.
-
-### `pipefail`
-
-Ошибка внутри pipeline не будет потеряна.
-
-Типичный старт:
+Объявление:
 
 ```bash
-#!/usr/bin/env bash
-
-set -euo pipefail
+greet() {
+    local name="$1"
+    printf 'Hello, %s\n' "$name"
+}
 ```
+
+Вызов:
+
+```bash
+greet "Alex"
+```
+
+Функция получает собственные позиционные параметры:
+
+```bash
+process() {
+    local first="$1"
+    local second="$2"
+}
+```
+
+Возврат status:
+
+```bash
+validate() {
+    [[ -n "$1" ]]
+}
+```
+
+или:
+
+```bash
+validate() {
+    if [[ -n "$1" ]]; then
+        return 0
+    fi
+    return 1
+}
+```
+
+Результат функции обычно передают через stdout:
+
+```bash
+result="$(calculate)"
+```
+
+а не через глобальную переменную.
 
 ---
 
-# 27. Перенаправление
+# 16. Потоки, pipeline и файловые дескрипторы
 
-stdout:
+Стандартные потоки:
 
-```bash
-command > output.txt
+```text
+0 stdin
+1 stdout
+2 stderr
 ```
 
-Добавить:
+Перенаправление stdout:
 
 ```bash
-command >> output.txt
+command > output.log
+```
+
+Дозапись:
+
+```bash
+command >> output.log
 ```
 
 stderr:
@@ -1017,483 +870,560 @@ stdout + stderr:
 command > output.log 2>&1
 ```
 
-В Bash:
+В Bash также:
 
 ```bash
 command &> output.log
 ```
 
-Выкинуть вывод:
+Подавление:
 
 ```bash
 command >/dev/null 2>&1
 ```
 
----
-
-# 28. Pipeline
-
-Передать результат команды следующей:
+## Pipeline
 
 ```bash
-ps aux | grep nginx
+grep 'ERROR' app.log | sort | uniq -c
 ```
 
-Например:
+Pipeline передаёт stdout одной команды на stdin следующей.
+
+## `PIPESTATUS`
+
+После pipeline:
 
 ```bash
-cat access.log | grep ERROR
+command1 | command2 | command3
+
+printf '%s\n' "${PIPESTATUS[@]}"
 ```
 
-Но если файл можно передать напрямую:
+`PIPESTATUS` содержит status каждого элемента pipeline.
+
+## `pipefail`
 
 ```bash
-grep ERROR access.log
+set -o pipefail
 ```
 
-Ещё:
-
-```bash
-ps aux |
-    grep nginx |
-    grep -v grep
-```
-
----
-
-# 29. grep
-
-Поиск:
-
-```bash
-grep "ERROR" app.log
-```
-
-Без регистра:
-
-```bash
-grep -i "error" app.log
-```
-
-С номером строки:
-
-```bash
-grep -n "ERROR" app.log
-```
-
-Рекурсивно:
-
-```bash
-grep -R "TODO" .
-```
-
-Исключить:
-
-```bash
-grep -v "DEBUG" app.log
-```
-
-Несколько вариантов:
-
-```bash
-grep -E 'ERROR|WARN' app.log
-```
-
-Только имена файлов:
-
-```bash
-grep -l "ERROR" *.log
-```
+Тогда pipeline считается неуспешным, если неуспешен соответствующий компонент согласно правилам `pipefail`, а не только последняя команда.
 
 ---
 
-# 30. find
+# 17. Here documents, here strings и process substitution
 
-Найти все `.log`:
+## Here document
 
 ```bash
-find . -type f -name "*.log"
+cat <<EOF
+User: $USER
+Home: $HOME
+EOF
 ```
 
-Каталоги:
+Кавычки у delimiter отключают интерполяцию:
 
 ```bash
-find . -type d
+cat <<'EOF'
+$USER
+$HOME
+EOF
 ```
 
-Файлы больше 100 MB:
+## Here string
 
 ```bash
-find . -type f -size +100M
+read -r value <<< "$input"
 ```
 
-Изменённые за последние сутки:
+## Process substitution
+
+Позволяет представить результат команды как файловый интерфейс:
 
 ```bash
-find . -type f -mtime -1
+diff <(sort file1) <(sort file2)
 ```
 
-Старше 30 дней:
+Также:
 
 ```bash
-find . -type f -mtime +30
+while IFS= read -r line; do
+    ...
+done < <(find . -type f)
+```
+
+Process substitution — Bash-функция и не является POSIX shell feature.
+
+---
+
+# 18. Подshell и группировка команд
+
+## Subshell
+
+Скобки создают subshell:
+
+```bash
+(
+    cd /tmp
+    printf '%s\n' "$PWD"
+)
+```
+
+Изменение каталога внутри не изменяет текущий shell.
+
+## Group command
+
+Фигурные скобки выполняют команды в текущем shell:
+
+```bash
+{
+    printf '%s\n' "one"
+    printf '%s\n' "two"
+}
+```
+
+Нужно учитывать синтаксис:
+
+```bash
+{
+    command
+}
+```
+
+Последняя команда перед `}` должна быть завершена `;` или переводом строки.
+
+## Pipeline и subshell
+
+Конструкция:
+
+```bash
+cat file | while IFS= read -r line; do
+    ...
+done
+```
+
+может выполнять `while` в subshell в зависимости от shell/контекста. Поэтому для изменения переменных после цикла предпочтительно:
+
+```bash
+while IFS= read -r line; do
+    ...
+done < file
 ```
 
 ---
 
-# 31. find + действия
+# 19. Фоновые процессы и job control
 
-Сначала проверить:
+Запуск в фоне:
 
 ```bash
-find /tmp -type f -name "*.tmp" -print
+long_command &
 ```
 
-Удалить:
+PID:
 
 ```bash
-find /tmp -type f -name "*.tmp" -delete
+long_command &
+pid=$!
 ```
 
-Выполнить команду:
+Ожидание:
 
 ```bash
-find . -type f -name "*.log" -exec gzip {} \;
+wait "$pid"
+```
+
+Несколько процессов:
+
+```bash
+cmd1 &
+pid1=$!
+
+cmd2 &
+pid2=$!
+
+wait "$pid1"
+wait "$pid2"
+```
+
+Интерактивный job control:
+
+```bash
+jobs
+fg
+bg
+```
+
+`Ctrl-Z` приостанавливает foreground job.
+
+Другие механизмы:
+
+```bash
+nohup command &
+disown
+```
+
+Современный Bash также предоставляет:
+
+```bash
+wait -n
+```
+
+для ожидания завершения любого из ожидаемых jobs/processes.
+
+---
+
+# 20. Сигналы и `trap`
+
+Часто используемые сигналы:
+
+```text
+SIGINT   Ctrl-C
+SIGTERM  корректное завершение
+SIGHUP   hangup
+```
+
+Обработчик:
+
+```bash
+cleanup() {
+    rm -f "$tmp"
+}
+
+trap cleanup EXIT
+```
+
+Несколько событий:
+
+```bash
+trap 'cleanup' EXIT INT TERM
+```
+
+Для серьёзных скриптов предпочтительнее именованная функция:
+
+```bash
+cleanup() {
+    ...
+}
+
+trap cleanup EXIT
+```
+
+а не сложная строка кода внутри `trap`.
+
+`EXIT` — специальное событие Bash, выполняющее trap при завершении shell.
+
+---
+
+# 21. `set`, `shopt` и режимы Bash
+
+Проверка:
+
+```bash
+set -o
+```
+
+Популярные параметры:
+
+```bash
+set -e
+set -u
+set -o pipefail
+```
+
+## `set -e`
+
+Просит shell завершаться при определённых ненулевых status. Это полезно, но **не является простым правилом «любая ошибка немедленно завершает скрипт»**. У `errexit` есть исключения и контекстные правила, особенно внутри `if`, `while`, `until`, `&&`, `||`, `!`, pipeline и некоторых подстановок.
+
+Поэтому `set -e` не заменяет явное управление ошибками.
+
+## `set -u`
+
+Обращение к неустановленной переменной может завершить shell:
+
+```bash
+set -u
+```
+
+Для необязательных переменных используйте:
+
+```bash
+"${OPTIONAL:-}"
+```
+
+## `pipefail`
+
+```bash
+set -o pipefail
+```
+
+Комбинация:
+
+```bash
+set -euo pipefail
+```
+
+часто используется как стартовая конфигурация production-скрипта, но требует понимания её семантики.
+
+## `shopt`
+
+Bash-specific options:
+
+```bash
+shopt
+shopt -s nullglob
+shopt -s globstar
+shopt -s dotglob
+shopt -s extglob
 ```
 
 ---
 
-# 32. sed
+# 22. Обработка ошибок
+
+Надёжный скрипт должен различать:
+
+1. ожидаемое условие;
+2. recoverable error;
+3. fatal error.
+
+Пример:
+
+```bash
+if ! curl -fsS --max-time 10 "$url" -o "$output"; then
+    printf '%s\n' "Download failed" >&2
+    exit 1
+fi
+```
+
+Для диагностики полезно:
+
+```bash
+printf 'ERROR: %s\n' "$message" >&2
+```
+
+Не следует полагаться исключительно на `$?` спустя несколько команд — status нужно проверять сразу или использовать условную конструкцию.
+
+---
+
+# 23. CLI-интерфейсы и `getopts`
+
+Для простых аргументов:
+
+```bash
+if (( $# < 1 )); then
+    printf 'Usage: %s FILE\n' "$0" >&2
+    exit 2
+fi
+```
+
+Для short options:
+
+```bash
+while getopts ':f:v' opt; do
+    case "$opt" in
+        f)
+            file="$OPTARG"
+            ;;
+        v)
+            verbose=true
+            ;;
+        \?)
+            printf 'Invalid option: -%s\n' "$OPTARG" >&2
+            exit 2
+            ;;
+        :)
+            printf 'Option -%s requires an argument\n' "$OPTARG" >&2
+            exit 2
+            ;;
+    esac
+done
+
+shift $((OPTIND - 1))
+```
+
+`getopts` — стандартный и переносимый способ обработки short options в shell.
+
+Для сложных CLI с длинными GNU-style options (`--foo`, `--bar=value`) часто требуется собственный parser или внешняя программа.
+
+---
+
+# 24. Работа с файлами и каталогами
+
+Создание:
+
+```bash
+mkdir -p "$dir"
+touch "$file"
+```
+
+Удаление:
+
+```bash
+rm -- "$file"
+rm -rf -- "$dir"
+```
+
+Перемещение:
+
+```bash
+mv -- "$source" "$destination"
+```
+
+Копирование:
+
+```bash
+cp -- "$source" "$destination"
+```
+
+Права:
+
+```bash
+chmod 600 "$file"
+chmod +x "$script"
+```
+
+Не используйте `rm -rf` с непроверенными путями.
+
+Особенно опасны конструкции, где пустая переменная может привести к неожиданному пути. Валидируйте критические пути до destructive operation.
+
+---
+
+# 25. Текстовые утилиты
+
+## `grep`
+
+```bash
+grep 'pattern' file
+grep -i 'pattern' file
+grep -n 'pattern' file
+grep -v 'pattern' file
+grep -R 'pattern' directory
+grep -E 'regex' file
+```
+
+## `sed`
 
 Замена:
 
 ```bash
-sed 's/foo/bar/g' file.txt
+sed 's/foo/bar/g' file
 ```
 
-Удалить строки:
+Удаление:
 
 ```bash
-sed '/DEBUG/d' app.log
+sed '/DEBUG/d' file
 ```
 
-Показать строки 10–20:
+Диапазон:
 
 ```bash
-sed -n '10,20p' file.txt
+sed -n '10,20p' file
 ```
 
-Изменить файл:
+`-i` требует внимания к различиям GNU/BSD.
+
+## `awk`
+
+Первая колонка:
 
 ```bash
-sed -i 's/foo/bar/g' file.txt
-```
-
-> `sed -i` отличается между GNU/Linux и macOS.
-
----
-
-# 33. awk
-
-Вывести первую колонку:
-
-```bash
-awk '{print $1}' file.txt
-```
-
-Вторую:
-
-```bash
-awk '{print $2}' file.txt
-```
-
-Первая + вторая:
-
-```bash
-awk '{print $1, $2}' file.txt
+awk '{print $1}' file
 ```
 
 Условие:
 
 ```bash
-awk '$2 > 100 {print $1}' file.txt
+awk '$2 > 100' file
 ```
 
-Сумма:
+Агрегация:
 
 ```bash
-awk '{sum += $2} END {print sum}' file.txt
+awk '{sum += $2} END {print sum}' file
 ```
 
----
-
-# 34. sort / uniq / wc
-
-Сортировка:
+## Остальные
 
 ```bash
-sort file.txt
+sort
+uniq
+wc
+cut
+tr
+head
+tail
+tee
+xargs
 ```
 
-Обратная:
-
-```bash
-sort -r file.txt
-```
-
-Числовая:
+Примеры:
 
 ```bash
 sort -n numbers.txt
-```
-
-Уникальные:
-
-```bash
-sort file.txt | uniq
-```
-
-Количество повторений:
-
-```bash
-sort file.txt | uniq -c
-```
-
-Самые частые:
-
-```bash
-sort file.txt |
-    uniq -c |
-    sort -nr
-```
-
-Количество строк:
-
-```bash
+uniq -c
 wc -l file.txt
-```
-
-Количество слов:
-
-```bash
-wc -w file.txt
-```
-
----
-
-# 35. cut / tr
-
-`cut`:
-
-```bash
 cut -d: -f1 /etc/passwd
-```
-
-Здесь:
-
-```text
--d:   разделитель :
--f1   первая колонка
-```
-
-Первые 10 символов:
-
-```bash
-cut -c1-10 file.txt
-```
-
-`tr`:
-
-```bash
-echo "hello" | tr 'a-z' 'A-Z'
-```
-
-Результат:
-
-```text
-HELLO
-```
-
-Удалить цифры:
-
-```bash
-echo "abc123" | tr -d '0-9'
+tr 'a-z' 'A-Z'
 ```
 
 ---
 
-# 36. xargs
+# 26. `find` и `xargs`
 
-Например:
+Поиск:
 
 ```bash
-find . -type f -name "*.log" -print0 |
-    xargs -0 wc -l
+find . -type f -name '*.log'
 ```
 
-`-print0` и `-0` позволяют безопаснее обрабатывать имена с пробелами.
-
----
-
-# 37. Here Document
+Размер:
 
 ```bash
-cat <<EOF
-Hello
-World
-User: $USER
-EOF
+find . -type f -size +100M
 ```
 
-Переменные раскрываются.
-
-Без раскрытия:
+Возраст:
 
 ```bash
-cat <<'EOF'
-Hello
-$USER
-EOF
+find . -type f -mtime -1
 ```
 
----
-
-# 38. Временные файлы
-
-Плохо:
+Команда:
 
 ```bash
-tmp="/tmp/myfile"
+find . -type f -name '*.log' -exec gzip {} \;
 ```
 
-Лучше:
+Удаление:
 
 ```bash
-tmp="$(mktemp)"
+find /tmp -type f -name '*.tmp' -delete
 ```
 
-Пример:
+Перед destructive operation полезно:
 
 ```bash
-tmp="$(mktemp)"
-
-echo "data" > "$tmp"
-
-cat "$tmp"
-
-rm -f "$tmp"
+find /tmp -type f -name '*.tmp' -print
 ```
 
-Для каталога:
+## `-print0` и `xargs -0`
+
+Безопаснее для имён с пробелами, переводами строк и специальными символами:
 
 ```bash
-tmp_dir="$(mktemp -d)"
+find . -type f -print0 |
+    xargs -0r command
 ```
 
 ---
 
-# 39. trap
+# 27. Процессы
 
-Автоматическая очистка:
-
-```bash
-tmp="$(mktemp)"
-
-cleanup() {
-    rm -f "$tmp"
-}
-
-trap cleanup EXIT
-```
-
-Полный пример:
-
-```bash
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-tmp="$(mktemp)"
-
-cleanup() {
-    rm -f "$tmp"
-}
-
-trap cleanup EXIT
-
-echo "Работаем..."
-```
-
----
-
-# 40. Логи
-
-Функция:
-
-```bash
-log() {
-    printf '[%s] %s\n' "$(date '+%F %T')" "$*"
-}
-```
-
-Использование:
-
-```bash
-log "Script started"
-log "Processing files"
-log "Done"
-```
-
-Ошибка:
-
-```bash
-error() {
-    printf '[%s] ERROR: %s\n' \
-        "$(date '+%F %T')" \
-        "$*" >&2
-}
-```
-
----
-
-# 41. Проверка команд
-
-Проверить наличие:
-
-```bash
-command -v curl
-```
-
-В условии:
-
-```bash
-if command -v jq >/dev/null 2>&1; then
-    echo "jq installed"
-else
-    echo "jq missing"
-fi
-```
-
-Функция:
-
-```bash
-require_command() {
-    command -v "$1" >/dev/null 2>&1 || {
-        echo "Required command not found: $1" >&2
-        exit 1
-    }
-}
-
-require_command curl
-require_command jq
-require_command git
-```
-
----
-
-# 42. Процессы
-
-Все процессы:
+Просмотр:
 
 ```bash
 ps aux
@@ -1505,185 +1435,140 @@ ps aux
 pgrep -a nginx
 ```
 
-Проверить:
+Завершение:
 
 ```bash
-if pgrep -x nginx >/dev/null; then
-    echo "nginx running"
-fi
+kill "$pid"
 ```
 
-Завершить:
+`SIGTERM` является предпочтительным первым сигналом для корректного завершения:
 
 ```bash
-kill PID
+kill -TERM "$pid"
 ```
 
-Принудительно:
+`SIGKILL`:
 
 ```bash
-kill -9 PID
+kill -KILL "$pid"
 ```
 
-> Сначала используй обычный `kill`. `kill -9` — крайний вариант.
+или:
+
+```bash
+kill -9 "$pid"
+```
+
+не позволяет процессу выполнить cleanup и поэтому является последним средством.
 
 ---
 
-# 43. Фоновые процессы
+# 28. Права и безопасность
 
-Запустить в фоне:
+Unix-модель прав включает:
 
-```bash
-long_command &
+```text
+user
+group
+other
 ```
 
-Получить PID:
+Проверка:
 
 ```bash
-long_command &
-pid=$!
+ls -l file
 ```
 
-Дождаться:
+Типичные права:
 
 ```bash
-wait "$pid"
+chmod 600 secret
+chmod 644 document
+chmod 755 executable
 ```
 
-Несколько задач:
+Не следует хранить секреты непосредственно в исходном коде:
 
 ```bash
-task1 &
-pid1=$!
-
-task2 &
-pid2=$!
-
-wait "$pid1"
-wait "$pid2"
+API_TOKEN="real-secret"
 ```
+
+Лучше использовать защищённое окружение, secret manager или другой механизм управления секретами.
+
+Особенно опасны:
+
+```bash
+eval "$user_input"
+```
+
+и выполнение непроверенного ввода через shell.
 
 ---
 
-# 44. SSH
+# 29. SSH, rsync и tar
 
-Подключиться:
-
-```bash
-ssh user@server
-```
-
-Выполнить команду:
+## SSH
 
 ```bash
 ssh user@server 'hostname'
 ```
 
-Несколько:
+Передача команд:
 
 ```bash
-ssh user@server '
-    cd /app
-    git pull --ff-only
-    ./deploy.sh
-'
+ssh user@server 'df -h /'
+```
+
+Для сложных сценариев полезно явно контролировать quoting: локальный shell и удалённый shell выполняют свои собственные этапы разбора.
+
+## rsync
+
+```bash
+rsync -av source/ destination/
+```
+
+Проверка без изменений:
+
+```bash
+rsync -av --dry-run source/ destination/
+```
+
+Зеркалирование:
+
+```bash
+rsync -av --delete source/ destination/
+```
+
+`--delete` требует особой осторожности.
+
+## tar
+
+Создание:
+
+```bash
+tar -czf archive.tar.gz directory/
+```
+
+Распаковка:
+
+```bash
+tar -xzf archive.tar.gz
+```
+
+Просмотр:
+
+```bash
+tar -tzf archive.tar.gz
 ```
 
 ---
 
-# 45. scp / rsync
+# 30. HTTP, JSON и API
 
-Скопировать файл:
-
-```bash
-scp file.txt user@server:/tmp/
-```
-
-Каталог:
+`curl`:
 
 ```bash
-scp -r ./project user@server:/tmp/
-```
-
-`rsync`:
-
-```bash
-rsync -av ./project/ user@server:/app/
-```
-
-Проверить без изменений:
-
-```bash
-rsync -av --dry-run ./project/ user@server:/app/
-```
-
-Синхронизация с удалением:
-
-```bash
-rsync -av --delete ./project/ user@server:/app/
-```
-
-> Перед `--delete` обязательно проверь направление и сделай `--dry-run`.
-
----
-
-# 46. tar
-
-Создать архив:
-
-```bash
-tar -czf backup.tar.gz project/
-```
-
-Распаковать:
-
-```bash
-tar -xzf backup.tar.gz
-```
-
-Посмотреть:
-
-```bash
-tar -tzf backup.tar.gz
-```
-
----
-
-# 47. curl
-
-GET:
-
-```bash
-curl https://example.com
-```
-
-Скачать:
-
-```bash
-curl -o file.html https://example.com
-```
-
-Следовать redirect:
-
-```bash
-curl -L https://example.com
-```
-
-Для скриптов:
-
-```bash
-curl -fsS https://example.com
-```
-
-Основные параметры:
-
-```text
--f   ошибка при HTTP 4xx/5xx
--s   silent
--S   показывать ошибки вместе с -s
--L   redirects
--o   output
--I   только headers
+curl -fsS --max-time 10 'https://example.com'
 ```
 
 POST JSON:
@@ -1693,628 +1578,38 @@ curl -fsS \
     -X POST \
     -H 'Content-Type: application/json' \
     -d '{"name":"Alex"}' \
-    https://example.com/api
+    'https://example.com/api'
 ```
+
+Для переменных:
+
+```bash
+payload=$(jq -n --arg name "$name" '{name: $name}')
+
+curl -fsS \
+    -H 'Content-Type: application/json' \
+    -d "$payload" \
+    "$url"
+```
+
+`jq`:
+
+```bash
+jq -r '.name'
+jq -r '.users[] | select(.active == true) | .name'
+```
+
+Не рекомендуется строить сложный JSON простой конкатенацией строк, если данные могут содержать кавычки или специальные символы.
 
 ---
 
-# 48. jq
+# 31. Git из Bash
 
-Для JSON используй `jq`.
-
-Получить поле:
+Проверка состояния:
 
 ```bash
-jq -r '.name' data.json
+git status --porcelain
 ```
-
-Массив:
-
-```bash
-jq -r '.users[] | .name' data.json
-```
-
-Фильтр:
-
-```bash
-jq -r '.users[] | select(.active == true) | .name' data.json
-```
-
-API:
-
-```bash
-response="$(curl -fsS https://example.com/api)"
-
-status="$(echo "$response" | jq -r '.status')"
-
-if [[ "$status" == "ok" ]]; then
-    echo "OK"
-fi
-```
-
----
-
-# 49. Cron
-
-Посмотреть:
-
-```bash
-crontab -l
-```
-
-Редактировать:
-
-```bash
-crontab -e
-```
-
-Каждый день в 03:00:
-
-```cron
-0 3 * * * /home/user/scripts/backup.sh >> /home/user/logs/backup.log 2>&1
-```
-
-Каждые 5 минут:
-
-```cron
-*/5 * * * * /home/user/scripts/check.sh
-```
-
-Формат:
-
-```text
-┌──────── минута
-│ ┌────── час
-│ │ ┌──── день месяца
-│ │ │ ┌── месяц
-│ │ │ │ ┌ день недели
-│ │ │ │ │
-* * * * *
-```
-
-Для cron используй абсолютные пути.
-
----
-
-# 50. systemd
-
-Service:
-
-```ini
-[Unit]
-Description=My App
-
-[Service]
-ExecStart=/usr/local/bin/myapp.sh
-Restart=on-failure
-```
-
-Timer:
-
-```ini
-[Unit]
-Description=Backup timer
-
-[Timer]
-OnCalendar=daily
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-```
-
-После изменения:
-
-```bash
-sudo systemctl daemon-reload
-```
-
-Запустить:
-
-```bash
-sudo systemctl enable --now backup.timer
-```
-
-Проверить:
-
-```bash
-systemctl status backup.timer
-```
-
-Логи:
-
-```bash
-journalctl -u backup.service
-```
-
----
-
-# 51. Отладка
-
-Проверка синтаксиса:
-
-```bash
-bash -n script.sh
-```
-
-Запустить с debug:
-
-```bash
-bash -x script.sh
-```
-
-Включить внутри:
-
-```bash
-set -x
-```
-
-Выключить:
-
-```bash
-set +x
-```
-
----
-
-# 52. ShellCheck
-
-Установи ShellCheck и запускай:
-
-```bash
-shellcheck script.sh
-```
-
-Это одна из самых полезных привычек при написании Bash.
-
----
-
-# 53. Безопасный Bash
-
-## Всегда кавычь переменные
-
-Хорошо:
-
-```bash
-rm -- "$file"
-```
-
-Плохо:
-
-```bash
-rm $file
-```
-
----
-
-## Используй `[[ ]]`
-
-Хорошо:
-
-```bash
-if [[ -f "$file" ]]; then
-```
-
----
-
-## Для чисел используй `(( ))`
-
-```bash
-if (( count > 10 )); then
-```
-
----
-
-## Проверяй входные данные
-
-```bash
-[[ -f "$file" ]] || {
-    echo "File not found: $file" >&2
-    exit 1
-}
-```
-
----
-
-## Не используй `eval` без крайней необходимости
-
-Плохо:
-
-```bash
-eval "$user_input"
-```
-
----
-
-## Перед удалением проверяй
-
-Сначала:
-
-```bash
-find "$dir" -type f -name "*.tmp" -print
-```
-
-Потом:
-
-```bash
-find "$dir" -type f -name "*.tmp" -delete
-```
-
----
-
-# 54. Практический шаблон Bash-скрипта
-
-Это один из главных шаблонов, который можно копировать:
-
-```bash
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-readonly SCRIPT_NAME="$(basename "$0")"
-
-log() {
-    printf '[%s] %s\n' "$(date '+%F %T')" "$*"
-}
-
-die() {
-    printf '[%s] ERROR: %s\n' \
-        "$(date '+%F %T')" \
-        "$*" >&2
-
-    exit 1
-}
-
-usage() {
-    cat <<EOF
-Usage:
-    $SCRIPT_NAME <file>
-
-Example:
-    $SCRIPT_NAME data.txt
-EOF
-}
-
-if (( $# != 1 )); then
-    usage
-    exit 1
-fi
-
-file="$1"
-
-[[ -f "$file" ]] ||
-    die "File not found: $file"
-
-log "Processing: $file"
-
-# Основная логика
-
-log "Done"
-```
-
----
-
-# 55. Проверка сервиса
-
-```bash
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-service="nginx"
-
-if systemctl is-active --quiet "$service"; then
-    echo "$service: OK"
-else
-    echo "$service: DOWN" >&2
-    exit 1
-fi
-```
-
----
-
-# 56. Проверка URL
-
-```bash
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-url="${1:-}"
-
-if [[ -z "$url" ]]; then
-    echo "Usage: $0 <url>"
-    exit 1
-fi
-
-if curl -fsS --max-time 10 "$url" >/dev/null; then
-    echo "OK: $url"
-else
-    echo "FAIL: $url" >&2
-    exit 1
-fi
-```
-
-Запуск:
-
-```bash
-./check-url.sh https://example.com
-```
-
----
-
-# 57. Проверка диска
-
-```bash
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-threshold=80
-
-usage="$(
-    df / |
-        awk 'NR==2 {
-            gsub("%", "", $5)
-            print $5
-        }'
-)"
-
-if (( usage >= threshold )); then
-    echo "WARNING: disk usage ${usage}%"
-    exit 1
-fi
-
-echo "Disk usage: ${usage}%"
-```
-
----
-
-# 58. Backup
-
-```bash
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-SOURCE="/home/user/project"
-DEST="/backup"
-
-mkdir -p "$DEST"
-
-timestamp="$(date '+%Y%m%d-%H%M%S')"
-archive="$DEST/project-$timestamp.tar.gz"
-
-tar -czf "$archive" "$SOURCE"
-
-echo "Created: $archive"
-```
-
----
-
-# 59. Backup + удаление старых файлов
-
-```bash
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-SOURCE="/home/user/project"
-DEST="/backup"
-
-mkdir -p "$DEST"
-
-timestamp="$(date '+%Y%m%d-%H%M%S')"
-archive="$DEST/project-$timestamp.tar.gz"
-
-tar -czf "$archive" "$SOURCE"
-
-find "$DEST" \
-    -type f \
-    -name 'project-*.tar.gz' \
-    -mtime +30 \
-    -delete
-
-echo "Backup: $archive"
-```
-
----
-
-# 60. Обработка всех файлов
-
-```bash
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-directory="${1:-.}"
-
-while IFS= read -r -d '' file; do
-    echo "Processing: $file"
-
-    # обработка "$file"
-
-done < <(
-    find "$directory" -type f -print0
-)
-```
-
----
-
-# 61. Поиск больших файлов
-
-```bash
-find /var -type f -size +500M -print
-```
-
-На GNU/Linux можно получить размер:
-
-```bash
-find /var -type f -printf '%s %p\n' 2>/dev/null |
-    sort -nr |
-    head -20
-```
-
----
-
-# 62. Поиск ошибок в логах
-
-```bash
-grep -E 'ERROR|CRITICAL' app.log
-```
-
-Количество:
-
-```bash
-grep -Ec 'ERROR|CRITICAL' app.log
-```
-
-Последние 100:
-
-```bash
-grep -E 'ERROR|CRITICAL' app.log | tail -100
-```
-
----
-
-# 63. Самые частые ошибки
-
-```bash
-grep "ERROR" app.log |
-    sed 's/.*ERROR: //' |
-    sort |
-    uniq -c |
-    sort -nr |
-    head -20
-```
-
----
-
-# 64. Проверка нескольких серверов
-
-```bash
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-servers=(
-    web1
-    web2
-    web3
-)
-
-for server in "${servers[@]}"; do
-    if ssh -o ConnectTimeout=5 "$server" 'echo OK' >/dev/null; then
-        echo "$server: OK"
-    else
-        echo "$server: FAIL"
-    fi
-done
-```
-
----
-
-# 65. Выполнить команду на нескольких серверах
-
-```bash
-servers=(
-    server1
-    server2
-    server3
-)
-
-for server in "${servers[@]}"; do
-    echo "=== $server ==="
-
-    ssh "$server" '
-        hostname
-        uptime
-        df -h /
-    '
-done
-```
-
----
-
-# 66. Lock от повторного запуска
-
-Если скрипт запускается через cron:
-
-```bash
-exec 9>/tmp/my-script.lock
-
-if ! flock -n 9; then
-    echo "Already running"
-    exit 1
-fi
-```
-
-Теперь второй экземпляр не запустится одновременно.
-
----
-
-# 67. Ограничение времени
-
-```bash
-timeout 30s ./script.sh
-```
-
-Например:
-
-```bash
-if timeout 10s curl -fsS https://example.com >/dev/null; then
-    echo "OK"
-else
-    echo "Timeout or error"
-fi
-```
-
----
-
-# 68. Process substitution
-
-Можно передать результат команды как файл:
-
-```bash
-diff <(sort file1.txt) <(sort file2.txt)
-```
-
-Ещё:
-
-```bash
-while IFS= read -r line; do
-    echo "$line"
-done < <(find . -type f)
-```
-
----
-
-# 69. Работа с переменными окружения
-
-Посмотреть:
-
-```bash
-env
-```
-
-Получить:
-
-```bash
-echo "$HOME"
-echo "$PATH"
-```
-
-Экспортировать:
-
-```bash
-export API_URL="https://example.com"
-```
-
-Дочерние процессы увидят переменную.
-
----
-
-# 70. Git из Bash
 
 Текущая ветка:
 
@@ -2322,104 +1617,280 @@ export API_URL="https://example.com"
 git branch --show-current
 ```
 
-Есть ли изменения:
+Проверка, есть ли изменения:
 
 ```bash
 if [[ -n "$(git status --porcelain)" ]]; then
-    echo "Changes exist"
-fi
-```
-
-Последний commit:
-
-```bash
-git log -1 --oneline
-```
-
----
-
-# 71. Deploy-скрипт
-
-```bash
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-APP_DIR="/opt/myapp"
-
-cd "$APP_DIR"
-
-echo "Pulling..."
-git pull --ff-only
-
-echo "Installing..."
-npm ci
-
-echo "Restarting..."
-sudo systemctl restart myapp
-
-echo "Checking..."
-
-if systemctl is-active --quiet myapp; then
-    echo "Deploy successful"
-else
-    echo "Deploy failed" >&2
+    printf '%s\n' "Working tree is not clean" >&2
     exit 1
 fi
 ```
 
+Git-операции в automation следует проверять по exit status, а не только по тексту вывода.
+
 ---
 
-# 72. Bash + JSON API
+# 32. Cron, systemd и launchd
+
+## Cron
+
+Редактор:
 
 ```bash
-#!/usr/bin/env bash
+crontab -e
+```
 
-set -euo pipefail
+Формат:
 
-API_URL="https://example.com/api"
+```text
+minute hour day-of-month month day-of-week command
+```
 
-response="$(curl -fsS "$API_URL")"
+Пример:
 
-status="$(jq -r '.status' <<< "$response")"
+```cron
+0 3 * * * /opt/scripts/backup.sh
+```
 
-if [[ "$status" == "ok" ]]; then
-    echo "API OK"
-else
-    echo "API ERROR"
+Для cron используйте абсолютные пути и учитывайте, что окружение cron отличается от интерактивного shell.
+
+## systemd
+
+Linux-система с systemd может использовать `.service` и `.timer`.
+
+После изменения unit:
+
+```bash
+sudo systemctl daemon-reload
+```
+
+Запуск:
+
+```bash
+sudo systemctl enable --now example.service
+```
+
+Статус:
+
+```bash
+systemctl status example.service
+```
+
+Логи:
+
+```bash
+journalctl -u example.service
+```
+
+## macOS
+
+macOS использует `launchd`, а не systemd.
+
+Инструмент управления:
+
+```bash
+launchctl
+```
+
+Поэтому документация для Linux и macOS должна разделять systemd и launchd.
+
+---
+
+# 33. Временные файлы, блокировки и timeout
+
+## `mktemp`
+
+```bash
+tmp="$(mktemp)"
+```
+
+Cleanup:
+
+```bash
+cleanup() {
+    rm -f -- "$tmp"
+}
+
+trap cleanup EXIT
+```
+
+Для временного каталога:
+
+```bash
+tmpdir="$(mktemp -d)"
+trap 'rm -rf -- "$tmpdir"' EXIT
+```
+
+При сложной логике лучше хранить cleanup в функции.
+
+## `flock`
+
+На Linux:
+
+```bash
+exec 9>/tmp/my-script.lock
+
+if ! flock -n 9; then
+    printf '%s\n' "Already running" >&2
     exit 1
 fi
 ```
 
----
+`flock` не является универсальной возможностью всех Unix/macOS-систем, поэтому переносимость необходимо учитывать.
 
-# 73. Bash + SQL
+## Timeout
 
-Если нужно выполнить SQL:
-
-```bash
-psql "$DATABASE_URL" <<'SQL'
-SELECT
-    id,
-    name
-FROM users
-LIMIT 10;
-SQL
-```
-
-Обрати внимание на:
+Если доступна GNU `timeout`:
 
 ```bash
-<<'SQL'
+timeout 30s ./script.sh
 ```
 
-Если переменные Bash не должны раскрываться.
+Это также не универсальная POSIX-команда.
 
 ---
 
-# 74. Чего НЕ стоит делать
+# 34. Логирование
 
-## Не парси `ls`
+Простой logger:
+
+```bash
+log() {
+    printf '[%s] %s\n' "$(date '+%F %T')" "$*"
+}
+
+die() {
+    printf '[%s] ERROR: %s\n' "$(date '+%F %T')" "$*" >&2
+    exit 1
+}
+```
+
+Использование:
+
+```bash
+log "Starting backup"
+die "Backup failed"
+```
+
+Для сложных систем логирование может передаваться journald, syslog или внешнему logging stack.
+
+---
+
+# 35. Отладка и статический анализ
+
+## Синтаксис
+
+```bash
+bash -n script.sh
+```
+
+## Трассировка
+
+```bash
+bash -x script.sh
+```
+
+или:
+
+```bash
+set -x
+...
+set +x
+```
+
+## ShellCheck
+
+```bash
+shellcheck script.sh
+```
+
+ShellCheck выявляет множество проблем:
+
+- неправильное quoting;
+- сомнительные конструкции;
+- ошибки shell semantics;
+- потенциально опасные расширения;
+- некоторые проблемы переносимости.
+
+Отладка и статический анализ дополняют, но не заменяют тестирование.
+
+---
+
+# 36. Переносимость Linux/macOS
+
+Нужно различать:
+
+### Bash portability
+
+Разные версии Bash поддерживают разные возможности.
+
+### Utility portability
+
+GNU и BSD-утилиты могут отличаться.
+
+Примеры потенциальных различий:
+
+```bash
+sed
+date
+grep
+find
+xargs
+readlink
+stat
+```
+
+Если скрипт должен работать на Linux и macOS, избегайте бездумного использования GNU-only options.
+
+Проверяйте окружение:
+
+```bash
+uname -s
+bash --version
+command -v gsed
+```
+
+---
+
+# 37. Производительность
+
+Bash отлично подходит для orchestration, но не всегда эффективен для больших объёмов данных.
+
+Неэффективный подход:
+
+```bash
+while read -r line; do
+    some_command "$line"
+done < huge_file
+```
+
+если `some_command` запускается сотни тысяч раз.
+
+Иногда лучше:
+
+- передать данные одной программе;
+- использовать `awk`;
+- использовать `sort`;
+- использовать специализированный инструмент;
+- перенести алгоритмически сложную часть в Python/Go/Rust и оставить Bash orchestration.
+
+Также полезно избегать ненужных subprocess:
+
+```bash
+value="$(cat file)"
+```
+
+обычно можно заменить:
+
+```bash
+value="$(< file)"
+```
+
+---
+
+# 38. Антипаттерны
+
+## Парсить `ls`
 
 Плохо:
 
@@ -2429,230 +1900,61 @@ for file in $(ls); do
 done
 ```
 
-Лучше:
+Лучше glob или `find`.
 
-```bash
-for file in *; do
-    ...
-done
-```
-
-или:
-
-```bash
-find . -type f
-```
-
----
-
-## Не делай `cat | grep`
+## Ненужный `cat`
 
 Плохо:
 
 ```bash
-cat file.txt | grep ERROR
+cat file | grep pattern
 ```
 
 Лучше:
 
 ```bash
-grep ERROR file.txt
+grep pattern file
 ```
 
----
+Это не «запрещённая» конструкция, а обычно избыточная.
 
-## Не используй `$@` без кавычек
+## Некавыченные переменные
 
 Плохо:
 
 ```bash
-for arg in $@; do
+rm $file
 ```
 
-Хорошо:
+Лучше:
 
 ```bash
-for arg in "$@"; do
+rm -- "$file"
 ```
+
+## `eval`
+
+Опасно:
+
+```bash
+eval "$user_input"
+```
+
+`eval` повторно интерпретирует строку как shell-код и требует исключительного контроля над входом.
+
+## Парсинг `ps`/`df`/`ls` обычным текстовым split
+
+По возможности используйте предназначенные для машинного использования интерфейсы, специальные флаги или системные API.
+
+## Опасный `rm -rf`
+
+Никогда не выполняйте destructive operation над непроверенным путём.
 
 ---
 
-## Не используй `eval`
+# 39. Production-шаблон
 
-Без крайней необходимости:
-
-```bash
-eval "$command"
-```
-
-не нужен.
-
----
-
-# 75. Мини-справочник операторов
-
-## Логические
-
-```bash
-&&      # AND
-||      # OR
-!       # NOT
-```
-
-Примеры:
-
-```bash
-command1 && command2
-```
-
-```bash
-command1 || command2
-```
-
-```bash
-if ! command; then
-    echo "failed"
-fi
-```
-
----
-
-## Файлы
-
-```bash
--f file
--d dir
--e path
--r file
--w file
--x file
--s file
-```
-
----
-
-## Строки
-
-```bash
-[[ "$a" == "$b" ]]
-[[ "$a" != "$b" ]]
-[[ -z "$a" ]]
-[[ -n "$a" ]]
-```
-
----
-
-## Числа
-
-```bash
-(( a == b ))
-(( a != b ))
-(( a > b ))
-(( a < b ))
-(( a >= b ))
-(( a <= b ))
-```
-
----
-
-# 76. Самые полезные конструкции — в одном месте
-
-## Переменная
-
-```bash
-name="Alex"
-```
-
-## Команда → переменная
-
-```bash
-result="$(command)"
-```
-
-## Условие
-
-```bash
-if [[ condition ]]; then
-    ...
-fi
-```
-
-## Числовое условие
-
-```bash
-if (( count > 10 )); then
-    ...
-fi
-```
-
-## Цикл
-
-```bash
-for item in "${items[@]}"; do
-    ...
-done
-```
-
-## While
-
-```bash
-while condition; do
-    ...
-done
-```
-
-## Функция
-
-```bash
-function_name() {
-    local value="$1"
-    ...
-}
-```
-
-## Проверка ошибки
-
-```bash
-if ! command; then
-    ...
-fi
-```
-
-## Выход
-
-```bash
-exit 0
-```
-
-или ошибка:
-
-```bash
-exit 1
-```
-
-## Лог
-
-```bash
-printf '[%s] %s\n' "$(date '+%F %T')" "$message"
-```
-
-## Временный файл
-
-```bash
-tmp="$(mktemp)"
-```
-
-## Очистка
-
-```bash
-trap 'rm -f "$tmp"' EXIT
-```
-
----
-
-# 77. Универсальный шаблон скрипта
-
-Если не знаешь, с чего начать новый скрипт — копируй это:
+Базовый каркас:
 
 ```bash
 #!/usr/bin/env bash
@@ -2666,590 +1968,310 @@ log() {
 }
 
 die() {
-    printf '[%s] ERROR: %s\n' \
-        "$(date '+%F %T')" \
-        "$*" >&2
+    printf '[%s] ERROR: %s\n' "$(date '+%F %T')" "$*" >&2
     exit 1
 }
 
 usage() {
-    cat <<EOF
-Usage:
-    $SCRIPT_NAME <argument>
-
-Example:
-    $SCRIPT_NAME test
-EOF
+    printf 'Usage: %s ARG\n' "$SCRIPT_NAME" >&2
 }
 
-# -------------------------
-# Проверка аргументов
-# -------------------------
+main() {
+    if (( $# < 1 )); then
+        usage
+        exit 2
+    fi
 
-if (( $# < 1 )); then
-    usage
-    exit 1
-fi
+    local arg="$1"
 
-argument="$1"
+    log "Starting"
+    log "Argument: $arg"
 
-# -------------------------
-# Проверка зависимостей
-# -------------------------
+    # Основная логика.
 
-require_command() {
-    command -v "$1" >/dev/null 2>&1 ||
-        die "Command not found: $1"
+    log "Finished"
 }
 
-# require_command curl
-# require_command jq
-
-# -------------------------
-# Основная логика
-# -------------------------
-
-log "Started"
-
-echo "Argument: $argument"
-
-# ...
-
-log "Finished"
+main "$@"
 ```
+
+Почему `main "$@"` полезен:
+
+- отделяет глобальную инициализацию от основной логики;
+- локальные переменные функции не загрязняют глобальную область;
+- упрощает тестирование;
+- делает структуру скрипта очевидной.
 
 ---
 
-# 78. Что выучить в первую очередь
+# 40. Тестирование и идемпотентность
 
-Если не хочется учить всё сразу, запомни сначала эти конструкции:
+Проверяйте:
+
+1. отсутствие аргументов;
+2. неправильные аргументы;
+3. отсутствующие файлы;
+4. пробелы в именах;
+5. пустые строки;
+6. специальные символы;
+7. недоступную сеть;
+8. отсутствие зависимостей;
+9. недостаточные права;
+10. повторный запуск.
+
+## Идемпотентность
+
+Идемпотентная операция может быть безопасно выполнена повторно без накопления нежелательных побочных эффектов.
+
+Например, вместо безусловного добавления строки:
 
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
+printf '%s\n' "option=value" >> config
 ```
 
-```bash
-variable="value"
-```
+может потребоваться проверка существования записи.
+
+Для systemd:
 
 ```bash
-echo "$variable"
+systemctl enable service
 ```
 
-```bash
-result="$(command)"
-```
+концептуально отличается от сценария, который каждый запуск вручную создаёт новый ресурс.
+
+Тестируйте повторный запуск:
 
 ```bash
-if [[ condition ]]; then
+./script.sh
+./script.sh
+```
+
+и проверяйте, что состояние системы осталось корректным.
+
+---
+
+# 41. Когда Bash перестаёт быть подходящим инструментом
+
+Bash особенно хорош для:
+
+- запуска и связывания программ;
+- файловых операций;
+- системного администрирования;
+- CI/CD;
+- orchestration;
+- простых deployment scripts;
+- автоматизации Unix.
+
+Рассмотрите другой язык, когда появляются:
+
+- сложные структуры данных;
+- большие объёмы данных;
+- сложные алгоритмы;
+- сложный HTTP-клиент;
+- многопоточность;
+- сложное тестирование;
+- большие объёмы бизнес-логики;
+- необходимость строгой типизации.
+
+Практическое правило:
+
+> Bash должен преимущественно **оркестрировать** специализированные инструменты, а не превращаться в большой универсальный application runtime.
+
+---
+
+# 42. Краткий справочник
+
+## Переменные
+
+```bash
+name="Alex"
+printf '%s\n' "$name"
+readonly NAME="value"
+export PATH="$HOME/bin:$PATH"
+```
+
+## Аргументы
+
+```bash
+$0
+$1
+$#
+"$@"
+"$*"
+$?
+$!
+$$
+```
+
+## Условия
+
+```bash
+[[ -f "$file" ]]
+[[ "$a" == "$b" ]]
+[[ "$text" == prefix* ]]
+[[ "$value" =~ regex ]]
+(( a < b ))
+```
+
+## Циклы
+
+```bash
+for x in "${array[@]}"; do
     ...
-fi
-```
+done
 
-```bash
-if (( number > 10 )); then
+while condition; do
     ...
-fi
-```
+done
 
-```bash
-for item in "${array[@]}"; do
+until condition; do
     ...
 done
 ```
 
-```bash
-while IFS= read -r line; do
-    ...
-done < file
-```
+## Функции
 
 ```bash
 function_name() {
     local value="$1"
+    ...
 }
 ```
 
-```bash
-case "$1" in
-    start) ... ;;
-    stop)  ... ;;
-    *)     ... ;;
-esac
-```
+## Файлы
 
 ```bash
-find . -type f -name "*.log"
+[[ -e "$path" ]]
+[[ -f "$path" ]]
+[[ -d "$path" ]]
 ```
+
+## Redirect
 
 ```bash
-grep "ERROR" file.log
+> file
+>> file
+2> file
+> file 2>&1
+&> file
+< file
 ```
 
-```bash
-sed 's/old/new/g' file
-```
-
-```bash
-awk '{print $1}' file
-```
-
-```bash
-command1 | command2 | command3
-```
-
-```bash
-command > file
-```
-
-```bash
-command >> file
-```
-
-```bash
-command >/dev/null 2>&1
-```
-
-```bash
-ssh user@server 'command'
-```
-
-```bash
-curl -fsS URL
-```
-
-```bash
-jq -r '.field' file.json
-```
-
----
-
-# 79. Ментальная модель Bash
-
-Большинство скриптов можно мыслить так:
-
-```text
-Вход
- │
- ├── аргументы
- ├── переменные окружения
- ├── файлы
- └── API
-       │
-       ▼
-   Проверка
-       │
-       ▼
-   Основная логика
-       │
-       ├── if
-       ├── case
-       ├── for
-       ├── while
-       └── functions
-       │
-       ▼
-   Команды Linux
-       │
-       ├── grep
-       ├── find
-       ├── sed
-       ├── awk
-       ├── curl
-       ├── ssh
-       └── systemctl
-       │
-       ▼
-   Результат
-       │
-       ├── stdout
-       ├── файл
-       ├── exit code
-       └── лог
-```
-
----
-
-# 80. Практический порядок изучения
-
-Рекомендуемый порядок:
-
-```text
-1. Команды Linux
-      ↓
-2. Переменные
-      ↓
-3. Кавычки
-      ↓
-4. if
-      ↓
-5. for
-      ↓
-6. while
-      ↓
-7. функции
-      ↓
-8. аргументы
-      ↓
-9. массивы
-      ↓
-10. grep
-      ↓
-11. find
-      ↓
-12. sed
-      ↓
-13. awk
-      ↓
-14. pipeline
-      ↓
-15. redirection
-      ↓
-16. trap
-      ↓
-17. обработка ошибок
-      ↓
-18. SSH / rsync
-      ↓
-19. curl / jq
-      ↓
-20. cron / systemd
-```
-
----
-
-# 81. Главный принцип Bash
-
-Не пытайся сделать всё на Bash.
-
-Bash особенно хорош, когда задача выглядит примерно так:
-
-```text
-найти файлы
-    ↓
-проверить условие
-    ↓
-запустить команду
-    ↓
-отфильтровать результат
-    ↓
-сохранить результат
-    ↓
-записать лог
-```
-
-Например:
-
-```bash
-find /var/log \
-    -type f \
-    -name "*.log" \
-    -mtime +30 \
-    -print
-```
-
-или:
-
-```bash
-grep ERROR app.log |
-    awk '{print $1}' |
-    sort |
-    uniq -c |
-    sort -nr |
-    head
-```
-
-Когда логика превращается в большое количество сложных структур данных, парсинг или бизнес-логику — обычно пора переходить на Python/Go/другой язык, а Bash оставить для orchestration.
-
----
-
-# 82. Финальный чеклист перед запуском скрипта
-
-Перед production-запуском:
-
-```text
-[ ] Есть #!/usr/bin/env bash
-[ ] Есть set -euo pipefail
-[ ] Переменные заключены в "$..."
-[ ] Используется [[ ]] для условий
-[ ] Числа сравниваются через (( ))
-[ ] Проверены аргументы
-[ ] Проверены входные файлы
-[ ] Проверены необходимые команды
-[ ] Ошибки идут в stderr
-[ ] Есть понятные exit codes
-[ ] Временные файлы очищаются через trap
-[ ] Удаление сначала протестировано через -print
-[ ] Нет eval
-[ ] Нет опасного парсинга ls
-[ ] Проверен ShellCheck
-[ ] Скрипт протестирован на копии данных
-```
-
----
-
-# 83. Самая короткая шпаргалка
-
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-# variable
-name="Alex"
-
-# command
-date_now="$(date '+%F %T')"
-
-# if
-if [[ -f "$file" ]]; then
-    echo "file"
-fi
-
-# numeric
-if (( count > 10 )); then
-    echo "many"
-fi
-
-# for
-for file in *.txt; do
-    echo "$file"
-done
-
-# while
-while IFS= read -r line; do
-    echo "$line"
-done < file.txt
-
-# function
-greet() {
-    local name="$1"
-    echo "Hello $name"
-}
-
-# case
-case "$1" in
-    start)  echo "start" ;;
-    stop)   echo "stop" ;;
-    *)      echo "unknown" ;;
-esac
-
-# find
-find . -type f -name "*.log"
-
-# grep
-grep -n "ERROR" app.log
-
-# sed
-sed 's/old/new/g' file
-
-# awk
-awk '{print $1}' file
-
-# pipeline
-grep ERROR app.log | sort | uniq -c | sort -nr
-
-# redirect
-command > output.log 2>&1
-
-# temp file
-tmp="$(mktemp)"
-trap 'rm -f "$tmp"' EXIT
-
-# ssh
-ssh user@server 'hostname'
-
-# curl
-curl -fsS https://example.com
-
-# json
-jq -r '.name' data.json
-
-# exit
-exit 0
-```
-
----
-
-# 84. Золотые правила Bash
-
-1. **Всегда думай о пробелах в именах файлов.**
-    
-2. **Кавычь переменные:** `"$var"`.
-    
-3. **Используй `[[ ]]` для условий Bash.**
-    
-4. **Используй `(( ))` для арифметики.**
-    
-5. **Используй `"$@"`, а не `$@`.**
-    
-6. **Не парсь `ls`.**
-    
-7. **Не используй `eval`, если можно обойтись без него.**
-    
-8. **Для JSON используй `jq`.**
-    
-9. **Для поиска файлов используй `find`.**
-    
-10. **Для сложной обработки текста используй `awk`/`sed`, а не огромные цепочки `grep`.**
-    
-11. **Перед опасным `rm` сначала делай `-print`.**
-    
-12. **Используй `set -euo pipefail`, понимая его особенности.**
-    
-13. **Используй `shellcheck`.**
-    
-14. **Для временных файлов используй `mktemp`.**
-    
-15. **Для cleanup используй `trap`.**
-    
-16. **Для повторяемых задач используй функции.**
-    
-17. **Для сложных скриптов делай `usage`.**
-    
-18. **Не запускай скрипты от root без необходимости.**
-    
-19. **Проверяй команды и входные данные.**
-    
-20. **Если Bash начинает превращаться в полноценную программу — рассмотрись Python/Go.**
-    
-
----
-
-# 85. Минимальный набор для 90% задач
-
-Если нужно запомнить буквально **20 вещей**, запомни:
-
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-```
-
-```bash
-"$variable"
-```
-
-```bash
-result="$(command)"
-```
-
-```bash
-if [[ ... ]]; then ... fi
-```
-
-```bash
-if (( ... )); then ... fi
-```
-
-```bash
-for x in "${array[@]}"; do ... done
-```
-
-```bash
-while IFS= read -r line; do ... done < file
-```
-
-```bash
-function_name() { ... }
-```
-
-```bash
-case "$1" in ... esac
-```
-
-```bash
-find ...
-```
-
-```bash
-grep ...
-```
-
-```bash
-sed ...
-```
-
-```bash
-awk ...
-```
+## Pipeline
 
 ```bash
 command1 | command2
 ```
 
-```bash
-command > file
-```
+## Background
 
 ```bash
-command 2> error.log
+command &
+pid=$!
+wait "$pid"
 ```
 
-```bash
-command >/dev/null 2>&1
-```
+## Temporary files
 
 ```bash
 tmp="$(mktemp)"
-trap 'rm -f "$tmp"' EXIT
+trap 'rm -f -- "$tmp"' EXIT
 ```
 
-```bash
-ssh user@server 'command'
-```
+## Strict-ish baseline
 
 ```bash
-curl -fsS URL
+set -euo pipefail
+```
+
+Но `set -e` требует понимания его исключений и не заменяет явную обработку ошибок.
+
+## Проверка
+
+```bash
+bash -n script.sh
+shellcheck script.sh
+bash -x script.sh
+```
+
+## Поиск
+
+```bash
+find . -type f -name '*.log'
+```
+
+## Text processing
+
+```bash
+grep
+sed
+awk
+sort
+uniq
+cut
+tr
+wc
+```
+
+## JSON
+
+```bash
+jq
+```
+
+## Network
+
+```bash
+curl
+ssh
+rsync
+```
+
+## Archive
+
+```bash
+tar
 ```
 
 ---
 
-## Итог
+# Заключение
 
-Для практического Bash тебе не нужно помнить сотни команд наизусть.
+Хороший Bash-скрипт обладает следующими свойствами:
 
-Достаточно уверенно владеть:
+1. Явно указывает используемый интерпретатор.
+2. Корректно обрабатывает аргументы.
+3. Соблюдает quoting.
+4. Проверяет ошибки критических операций.
+5. Не доверяет непроверенному пользовательскому вводу.
+6. Безопасно работает с именами файлов.
+7. Корректно обрабатывает временные ресурсы.
+8. Имеет предсказуемый exit status.
+9. Проверяется ShellCheck и `bash -n`.
+10. Протестирован на ошибочных и граничных сценариях.
+11. Учитывает целевую версию Bash.
+12. Учитывает различия GNU/BSD и Linux/macOS.
+13. Не содержит ненужной бизнес-логики, которую разумнее реализовать в Python, Go или другом подходящем языке.
+14. По возможности является идемпотентным.
+15. Явно документирует предположения об окружении.
+
+Главная ментальная модель Bash:
 
 ```text
-переменные
-    +
-if / case
-    +
-for / while
-    +
-функции
-    +
-аргументы
-    +
-массивы
-    +
-pipes
-    +
-redirects
-    +
-grep / find / sed / awk
-    +
-curl / jq
-    +
-ssh / rsync
-    +
-trap / обработка ошибок
+Входные данные
+      ↓
+Разбор shell
+      ↓
+Expansions
+      ↓
+Запуск команды
+      ↓
+stdin / stdout / stderr
+      ↓
+Exit status
+      ↓
+Следующая команда / условие / pipeline
 ```
 
-А остальные команды можно находить по мере необходимости через:
+Для уверенного владения Bash необходимо понимать не только синтаксис отдельных команд, но и **порядок разбора shell-команды, quoting, expansion, word splitting, globbing, процессы, файловые дескрипторы и exit status**. Именно эти механизмы объясняют большинство сложных и труднообнаружимых ошибок shell-скриптов.
 
-```bash
-man command
-```
-
-или:
-
-```bash
-command --help
-```
-
-и проверять готовый код через:
-
-```bash
-shellcheck script.sh
-```
