@@ -43,7 +43,8 @@ graph LR
 | **Динамические клиенты** | Работа с неизвестными заранее ресурсами (операторы, CRD) | Go: `dynamic.Interface`, Python: `DynamicClient` |
 | **Server-side apply** | Декларативное управление с отслеживанием владения | `kubectl apply --server-side -f manifest.yaml` |
 
-### 🔍 Пример прямого запроса к API
+### Пример прямого запроса к API
+
 ```bash
 # Получить токен из kubeconfig
 TOKEN=$(kubectl config view --raw -o jsonpath='{.users[*].user.token}' 2>/dev/null || \
