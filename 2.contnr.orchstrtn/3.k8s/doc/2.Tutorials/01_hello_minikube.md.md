@@ -1,40 +1,106 @@
-# 🎯 Практика 1: Hello Minikube — первый деплой в Kubernetes
+# Hello Minikube — первый деплой в Kubernetes
 
-> 📌 **Цель**: Развернуть первое приложение в minikube, понять базовые команды kubectl, увидеть связь между Pod, Deployment и Service.
-> 
-> **Связь с теорией**: [[02.deployaments]], [[02.service]], [[01.pod]], [[01.k8s_overview]]
-> 
-> **Время**: 30-45 минут
-
----
-
-## Цели практики
-
-- [ ] Запустить minikube и проверить состояние кластера
-- [ ] Создать Deployment с тестовым приложением
-- [ ] Посмотреть Pod'ы, события, логи
-- [ ] Создать Service для доступа к приложению
-- [ ] Включить addon metrics-server
-- [ ] Очистить ресурсы
+>**Цели практики:**
+>- Запустить локальный кластер minikube и проверить состояние компонента control plane.
+>- Создать объект Deployment с тестовым приложением.
+>- Проанализировать состояние Pod'ов, системных событий и логов контейнеров.
+>- Создать объект Service для обеспечения сетевого доступа к приложению.
+>- Включить дополнение metrics-server и проверить параметры сбора метрик.
+>- Выполнить корректную очистку созданных ресурсов кластера.
 
 ---
+## Содержание
 
-## 🔧 Шаг 0: Подготовка окружения
+1. [[#Подготовка окружения|Подготовка окружения]]
+	1. [[#Подготовка окружения#Проверка установки minikube|Проверка установки minikube]]
+	2. [[#Подготовка окружения#Проверка установки kubectl|Проверка установки kubectl]]
+	3. [[#Подготовка окружения#Проверка установки Docker|Проверка установки Docker]]
+2. [[#Запуск minikube|Запуск minikube]]
+	1. [[#Запуск minikube#Выполнение команды запуска|Выполнение команды запуска]]
+	2. [[#Запуск minikube#Последовательность процессов при запуске|Последовательность процессов при запуске]]
+	3. [[#Запуск minikube#Ожидаемый вывод команды|Ожидаемый вывод команды]]
+	4. [[#Запуск minikube#Проверка статуса кластера|Проверка статуса кластера]]
+	5. [[#Запуск minikube#Контрольный чек-лист запуска|Контрольный чек-лист запуска]]
+3. [[#Работа с веб-интерфейсом Dashboard|Работа с веб-интерфейсом Dashboard]]
+	1. [[#Работа с веб-интерфейсом Dashboard#Запуск Dashboard|Запуск Dashboard]]
+	2. [[#Работа с веб-интерфейсом Dashboard#Получение URL-адреса без автоматического открытия браузера|Получение URL-адреса без автоматического открытия браузера]]
+4. [[#Создание объекта Deployment|Создание объекта Deployment]]
+	1. [[#Создание объекта Deployment#Выполнение команды создания|Выполнение команды создания]]
+	2. [[#Создание объекта Deployment#Структура параметров команды|Структура параметров команды]]
+	3. [[#Создание объекта Deployment#Последовательность создания объектов|Последовательность создания объектов]]
+	4. [[#Создание объекта Deployment#Проверка состояния Deployment|Проверка состояния Deployment]]
+	5. [[#Создание объекта Deployment#Расшифровка столбцов вывода Deployment|Расшифровка столбцов вывода Deployment]]
+	6. [[#Создание объекта Deployment#Проверка состояния Pod'ов|Проверка состояния Pod'ов]]
+	7. [[#Создание объекта Deployment#Расшифровка столбцов вывода Pod'ов|Расшифровка столбцов вывода Pod'ов]]
+	8. [[#Создание объекта Deployment#Просмотр журнала системных событий|Просмотр журнала системных событий]]
+	9. [[#Создание объекта Deployment#Классификация системных событий|Классификация системных событий]]
+	10. [[#Создание объекта Deployment#Просмотр конфигурации kubectl|Просмотр конфигурации kubectl]]
+	11. [[#Создание объекта Deployment#Структура файла конфигурации|Структура файла конфигурации]]
+	12. [[#Создание объекта Deployment#Просмотр логов контейнера|Просмотр логов контейнера]]
+	13. [[#Создание объекта Deployment#Контрольный чек-лист шага|Контрольный чек-лист шага]]
+5. [[#Создание объекта Service|Создание объекта Service]]
+	1. [[#Создание объекта Service#Проблема сетевой адресации|Проблема сетевой адресации]]
+	2. [[#Создание объекта Service#Назначение абстракции Service|Назначение абстракции Service]]
+	3. [[#Создание объекта Service#Команда экспонирования|Команда экспонирования]]
+	4. [[#Создание объекта Service#Структура параметров команды|Структура параметров команды]]
+	5. [[#Создание объекта Service#Последовательность сетевой настройки|Последовательность сетевой настройки]]
+	6. [[#Создание объекта Service#Проверка параметров Service|Проверка параметров Service]]
+	7. [[#Создание объекта Service#Расшифровка столбцов вывода Service|Расшифровка столбцов вывода Service]]
+	8. [[#Создание объекта Service#Организация доступа к сервису|Организация доступа к сервису]]
+	9. [[#Создание объекта Service#Извлечение URL-адреса без запуска браузера|Извлечение URL-адреса без запуска браузера]]
+	10. [[#Создание объекта Service#Проверка работоспособности сервиса через curl|Проверка работоспособности сервиса через curl]]
+	11. [[#Создание объекта Service#Тестирование эндпоинтов приложения|Тестирование эндпоинтов приложения]]
+	12. [[#Создание объекта Service#Контрольный чек-лист шага|Контрольный чек-лист шага]]
+6. [[#Включение дополнения metrics-server|Включение дополнения metrics-server]]
+	1. [[#Включение дополнения metrics-server#Назначение аддонов minikube|Назначение аддонов minikube]]
+	2. [[#Включение дополнения metrics-server#Просмотр списка доступных аддонов|Просмотр списка доступных аддонов]]
+	3. [[#Включение дополнения metrics-server#Активация metrics-server|Активация metrics-server]]
+	4. [[#Включение дополнения metrics-server#Порядок запуска компонента|Порядок запуска компонента]]
+	5. [[#Включение дополнения metrics-server#Проверка статуса запуска Pod'а metrics-server|Проверка статуса запуска Pod'а metrics-server]]
+	6. [[#Включение дополнения metrics-server#Проверка состояния сервиса metrics-server|Проверка состояния сервиса metrics-server]]
+	7. [[#Включение дополнения metrics-server#Запрос метрик использования ресурсов|Запрос метрик использования ресурсов]]
+	8. [[#Включение дополнения metrics-server#Отключение metrics-server|Отключение metrics-server]]
+7. [[#Очистка ресурсов|Очистка ресурсов]]
+	1. [[#Очистка ресурсов#Удаление сервиса|Удаление сервиса]]
+	2. [[#Очистка ресурсов#Удаление Deployment|Удаление Deployment]]
+	3. [[#Очистка ресурсов#Последовательность удаления сущностей|Последовательность удаления сущностей]]
+	4. [[#Очистка ресурсов#Проверка очистки пространства имен|Проверка очистки пространства имен]]
+8. [[#Остановка и удаление кластера minikube|Остановка и удаление кластера minikube]]
+	1. [[#Остановка и удаление кластера minikube#Остановка кластера|Остановка кластера]]
+	2. [[#Остановка и удаление кластера minikube#Полное удаление кластера (опционально)|Полное удаление кластера (опционально)]]
+9. [[#Дополнительные практические задания|Дополнительные практические задания]]
+	1. [[#Дополнительные практические задания#Задание 1: Масштабирование объекта Deployment|Задание 1: Масштабирование объекта Deployment]]
+	2. [[#Дополнительные практические задания#Задание 2: Проведение поэтапного обновления (Rolling Update)|Задание 2: Проведение поэтапного обновления (Rolling Update)]]
+	3. [[#Дополнительные практические задания#Задание 3: Применение декларативного подхода (Declarative Management)|Задание 3: Применение декларативного подхода (Declarative Management)]]
+	4. [[#Дополнительные практические задания#Задание 4: Экспонирование через Service типа NodePort|Задание 4: Экспонирование через Service типа NodePort]]
+	5. [[#Дополнительные практические задания#Задание 5: Инспекция объектов кластера|Задание 5: Инспекция объектов кластера]]
+10. [[#Сводный чек-лист выполнения практики|Сводный чек-лист выполнения практики]]
+	1. [[#Сводный чек-лист выполнения практики#Базовый уровень|Базовый уровень]]
+	2. [[#Сводный чек-лист выполнения практики#Углубленный уровень|Углубленный уровень]]
+11. [[#Ключевые выводы|Ключевые выводы]]
 
-### Проверка: minikube установлен?
 
-```bash
+
+----
+## Подготовка окружения
+
+### Проверка установки minikube
+
+Для проверки версии инструмента minikube выполняется команда:
+
+```Bash
 minikube version
 ```
 
-**Ожидаемый результат**:
-```
-minikube version: v1.32.0 (или новее)
-commit: ...
+Ожидаемый результат:
+
+```Bash
+minikube version: v1.32.0
 ```
 
-**❌ Если не установлен**:
-```bash
+При отсутствии установленной утилиты minikube используется соответствующий сценарий установки в зависимости от операционной системы:
+
+```Bash
 # macOS
 brew install minikube
 
@@ -46,19 +112,23 @@ sudo install minikube-linux-amd64 /usr/local/bin/minikube
 choco install minikube
 ```
 
-### Проверка: kubectl установлен?
+### Проверка установки kubectl
 
-```bash
+Верификация клиентской версии утилиты управления `kubectl`:
+
+```Bash
 kubectl version --client
 ```
 
-**Ожидаемый результат**:
-```
-Client Version: v1.29.0 (или новее)
+Ожидаемый результат:
+
+```Bash
+Client Version: v1.29.0
 ```
 
-**❌ Если не установлен**:
-```bash
+При отсутствии утилиты `kubectl` выполняется установка:
+
+```Bash
 # macOS
 brew install kubectl
 
@@ -70,64 +140,68 @@ sudo install kubectl /usr/local/bin/kubectl
 choco install kubectl
 ```
 
-### Проверка: Docker установлен?
+### Проверка установки Docker
 
-```bash
+Для проверки версии среды виртуализации Docker используется команда:
+
+```Bash
 docker --version
 ```
 
-**Ожидаемый результат**:
+Ожидаемый результат:
+
 ```
-Docker version 24.0.7 (или новее)
+Docker version 24.0.7
 ```
 
-> 💡 **Примечание**: minikube может использовать Docker, VirtualBox, HyperKit и другие драйверы. Docker — самый простой вариант.
+Примечание: minikube поддерживают работу через драйверы Docker, VirtualBox, HyperKit и другие среды, однако Docker является базовым стандартным драйвером.
 
 ---
+## Запуск minikube
 
-## 🚀 Шаг 1: Запуск minikube
+### Выполнение команды запуска
 
-### Команда
+Запуск локального кластера выполняется с помощью следующей команды:
 
 ```bash
 minikube start
 ```
 
-### Что происходит?
+### Последовательность процессов при запуске
 
-1. Создаётся виртуальная машина (или контейнер) для кластера
-2. Устанавливается Kubernetes control plane
-3. Настраивается kubeconfig для kubectl
-4. Запускаются системные Pod'ы (coredns, etcd, kube-apiserver, etc.)
+1. Создание виртуальной среды или контейнера для узла кластера.
+2. Установка и запуск компонентов Kubernetes control plane.
+3. Настройка файла конфигурации `kubeconfig` для взаимодействия через `kubectl`.
+4. Запуск системных Pod'ов (CoreDNS, etcd, kube-apiserver и др.).
 
-### Ожидаемый результат
+### Ожидаемый вывод команды
 
-```
-😄  minikube v1.32.0 on Darwin 14.2.1
-✨  Using the docker driver based on user configuration
-📌  Using Docker Desktop driver with root privileges
-👍  Starting control plane node minikube in cluster minikube
-🚜  Pulling base image ...
-🔥  Creating docker container (CPUs=2, Memory=4000MB) ...
-🐳  Preparing Kubernetes v1.29.0 on Docker 24.0.7 ...
+```bash
+minikube v1.32.0 on Darwin 14.2.1
+Using the docker driver based on user configuration
+Starting control plane node minikube in cluster minikube
+Pulling base image ...
+Creating docker container (CPUs=2, Memory=4000MB) ...
+Preparing Kubernetes v1.29.0 on Docker 24.0.7 ...
     ▪ Generating certificates and keys ...
     ▪ Booting up control plane ...
     ▪ Configuring RBAC rules ...
-🔗  Configuring bridge CNI (Container Networking Interface) ...
-🔎  Verifying Kubernetes components...
+Configuring bridge CNI (Container Networking Interface) ...
+Verifying Kubernetes components...
     ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
-🌟  Enabled addons: default-storageclass, storage-provisioner
-🏄  Done! kubectl is now configured to use "minikube" cluster
+Enabled addons: default-storageclass, storage-provisioner
+Done! kubectl is now configured to use "minikube" cluster
 ```
 
-### Проверка статуса
+### Проверка статуса кластера
 
 ```bash
 minikube status
 ```
 
-**Ожидаемый результат**:
-```
+Ожидаемый результат:
+
+```bash
 minikube
 type: Control Plane
 host: Running
@@ -136,49 +210,46 @@ apiserver: Running
 kubeconfig: Configured
 ```
 
-### ✅ Чек-лист шага 1
+### Контрольный чек-лист запуска
 
-- [x] minikube запущен (`minikube start` выполнен успешно)
-- [x] Все компоненты в статусе `Running` (`minikube status`)
-- [x] kubectl настроен на minikube (`kubectl config current-context` показывает `minikube`)
+- Команда `minikube start` выполнена без ошибок.
+- Все управляющие компоненты находятся в состоянии `Running` по данным `minikube status`.
+- Активный контекст `kubectl config current-context` указывает на `minikube`.
 
 ---
+## Работа с веб-интерфейсом Dashboard
 
-## 🖥️ Шаг 2: Dashboard (опционально)
+### Запуск Dashboard
 
-### Команда
+Для инициализации и открытия веб-интерфейса управления Kubernetes Dashboard используется команда:
 
 ```bash
 minikube dashboard
 ```
 
-### Что происходит?
+В результате работы команды разворачивается графический интерфейс пользователя (GUI) для визуального управления ресурсами кластера.
 
-Открывается веб-интерфейс Kubernetes Dashboard в браузере. Это GUI для управления кластером.
-
-### Если не хочешь открывать браузер
+### Получение URL-адреса без автоматического открытия браузера
 
 ```bash
 minikube dashboard --url
 ```
 
-**Ожидаемый результат**:
-```
+Ожидаемый результат:
+
+```bash
 http://127.0.0.1:XXXXX/api/v1/namespaces/kubernetes-dashboard/services/http:kubernetes-dashboard:/proxy/
 ```
 
-> 💡 **Совет**: Dashboard полезен для новичков, но в production обычно не используется. Лучше учиться через kubectl.
-
-### ✅ Чек-лист шага 2
-
-- [x] Dashboard открылся (или URL получен)
-- [x] Можешь видеть Pod'ы, Deployments, Services в UI
+>**Примечание:** 
+>Графический интерфейс удобен для первичного знакомства с ресурсами, но в промышленной эксплуатации основной утилитой администрирования является `kubectl`.
 
 ---
+## Создание объекта Deployment
 
-## 📦 Шаг 3: Создание Deployment
+### Выполнение команды создания
 
-### Команда
+Для создания сущности Deployment в императивном стиле используется команда:
 
 ```bash
 kubectl create deployment hello-node \
@@ -186,77 +257,77 @@ kubectl create deployment hello-node \
   -- /agnhost netexec --http-port=8080
 ```
 
-### Разбор команды
+Образ `agnhost` — специализированный тестовый образ Kubernetes, запуск которого инициализирует встроенный HTTP-сервер на порту `8080`, обрабатывающий входящие сетевые запросы.
 
-| Часть | Что делает |
-|-------|------------|
-| `kubectl create deployment` | Создаёт Deployment (императивный подход) |
-| `hello-node` | Имя Deployment |
-| `--image=...` | Образ контейнера |
-| `-- /agnhost netexec --http-port=8080` | Команда, которая запустится в контейнере |
+### Структура параметров команды
 
-### Что такое `agnhost`?
+| **Параметр / Выражение**               | **Назначение и функциональная роль**                              |
+| -------------------------------------- | ----------------------------------------------------------------- |
+| `kubectl create deployment`            | Императивная команда создания объекта Deployment                  |
+| `hello-node`                           | Уникальное имя создаваемого объекта Deployment                    |
+| `--image=...`                          | Указание контейнерного образа для запускных емкостей              |
+| `-- /agnhost netexec --http-port=8080` | Передаваемая команда и аргументы для исполнения внутри контейнера |
 
-Это тестовый образ от Kubernetes, который запускает простой HTTP-сервер на порту 8080. Он отвечает на все запросы.
+### Последовательность создания объектов
 
-### Что происходит?
+1. Создается сущность Deployment с именем `hello-node`.
+2. Deployment автоматически генерирует и контролирует объект ReplicaSet.
+3. ReplicaSet инициализирует Pod с контейнером на базе образа `agnhost`.
+4. Системный агент `kubelet` на рабочем узле запускает целевой контейнер.
 
-1. Создаётся Deployment `hello-node`
-2. Deployment создаёт ReplicaSet
-3. ReplicaSet создаёт Pod с контейнером `agnhost`
-4. Kubelet на ноде запускает контейнер
-
-### Проверка Deployment
+### Проверка состояния Deployment
 
 ```bash
 kubectl get deployments
 ```
 
-**Ожидаемый результат**:
-```
+Ожидаемый результат:
+
+```bash
 NAME         READY   UP-TO-DATE   AVAILABLE   AGE
 hello-node   1/1     1            1           1m
 ```
 
-### Разбор колонок
+### Расшифровка столбцов вывода Deployment
 
-| Колонка | Что означает |
-|---------|--------------|
-| `READY` | Сколько Pod'ов готово / сколько должно быть |
-| `UP-TO-DATE` | Сколько Pod'ов обновлены до последней версии |
-| `AVAILABLE` | Сколько Pod'ов доступны для трафика |
-| `AGE` | Как давно создан Deployment |
+|**Название столбца**|**Значение**|
+|---|---|
+|`READY`|Соотношение готовых Pod'ов к целевому количеству|
+|`UP-TO-DATE`|Количество Pod'ов, обновленных до текущей спецификации|
+|`AVAILABLE`|Количество Pod'ов, доступных для обслуживания трафика|
+|`AGE`|Время, прошедшее с момента создания объекта|
 
-### Проверка Pod'ов
-
+### Проверка состояния Pod'ов
 ```bash
 kubectl get pods
 ```
 
-**Ожидаемый результат**:
-```
+Ожидаемый результат:
+
+```bash
 NAME                          READY   STATUS    RESTARTS   AGE
 hello-node-5f76cf6ccf-br9b5   1/1     Running   0          1m
 ```
 
-### Разбор колонок
+### Расшифровка столбцов вывода Pod'ов
 
-| Колонка | Что означает |
-|---------|--------------|
-| `NAME` | Имя Pod'а (генерируется автоматически: `<deployment>-<replicaset>-<hash>`) |
-| `READY` | Сколько контейнеров готово / сколько должно быть |
-| `STATUS` | Текущий статус: Pending, Running, Succeeded, Failed, Unknown |
-| `RESTARTS` | Сколько раз контейнер перезапускался |
-| `AGE` | Как давно создан Pod |
+| **Название столбца** | **Значение**                                                                     |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `NAME`               | Автоматически сгенерированное имя Pod'а (`<deployment>-<replicaset>-<hash>`)     |
+| `READY`              | Соотношение готовых контейнеров внутри Pod'а к общему их числу                   |
+| `STATUS`             | Текущее состояние Pod'а (`Pending`, `Running`, `Succeeded`, `Failed`, `Unknown`) |
+| `RESTARTS`           | Количество перезапусков контейнеров в Pod'е                                      |
+| `AGE`                | Время жизни объекта Pod                                                          |
 
-### Проверка событий
+### Просмотр журнала системных событий
 
 ```bash
 kubectl get events
 ```
 
-**Ожидаемый результат** (последние события):
-```
+Ожидаемый результат:
+
+```bash
 LAST SEEN   TYPE     REASON              OBJECT                               MESSAGE
 2m          Normal   Scheduled           pod/hello-node-5f76cf6ccf-br9b5      Successfully assigned default/hello-node-... to minikube
 2m          Normal   Pulling             pod/hello-node-5f76cf6ccf-br9b5      Pulling image "registry.k8s.io/e2e-test-images/agnhost:2.53"
@@ -267,29 +338,30 @@ LAST SEEN   TYPE     REASON              OBJECT                               ME
 2m          Normal   ScalingReplicaSet   deployment/hello-node                Scaled up replica set hello-node-... to 1
 ```
 
-### Разбор событий
+### Классификация системных событий
 
-| Тип | Что означает |
-|-----|--------------|
-| `Scheduled` | Планировщик назначил Pod на ноду |
-| `Pulling` | Kubelet загружает образ |
-| `Pulled` | Образ загружен |
-| `Created` | Контейнер создан |
-| `Started` | Контейнер запущен |
-| `ScalingReplicaSet` | ReplicaSet масштабируется |
+|**Тип события**|**Значение**|
+|---|---|
+|`Scheduled`|Планировщик `kube-scheduler` назначил Pod на конкретный узел|
+|`Pulling`|Агент `kubelet` запустил процесс скачивания контейнерного образа|
+|`Pulled`|Скачивание образа успешно завершено|
+|`Created`|Контейнер успешно сформирован в среде выполнения|
+|`Started`|Контейнер переведен в состояние запуска|
+|`ScalingReplicaSet`|Произошло изменение масштаба объекта ReplicaSet|
 
-### Проверка конфигурации kubectl
+### Просмотр конфигурации kubectl
 
 ```bash
 kubectl config view
 ```
 
-**Ожидаемый результат** (фрагмент):
+Ожидаемый результат (фрагмент):
+
 ```yaml
 apiVersion: v1
 clusters:
 - cluster:
-    certificate-authority: /Users/.../.minikube/ca.crt
+    certificate-authority: /home/user/.minikube/ca.crt
     server: https://127.0.0.1:XXXXX
   name: minikube
 contexts:
@@ -302,56 +374,56 @@ kind: Config
 users:
 - name: minikube
   user:
-    client-certificate: /Users/.../.minikube/profiles/minikube/client.crt
-    client-key: /Users/.../.minikube/profiles/minikube/client.key
+    client-certificate: /home/user/.minikube/profiles/minikube/client.crt
+    client-key: /home/user/.minikube/profiles/minikube/client.key
 ```
 
-### Разбор
+### Структура файла конфигурации
 
-| Поле | Что означает |
-|------|--------------|
-| `clusters` | Список кластеров (в нашем случае — minikube) |
-| `contexts` | Список контекстов (связка cluster + user) |
-| `current-context` | Активный контекст (куда kubectl отправляет команды) |
-| `users` | Список пользователей (credentials для аутентификации) |
+|**Поле**|**Назначение**|
+|---|---|
+|`clusters`|Перечень доступных кластеров и адресов их API-серверов|
+|`contexts`|Связки параметов доступа (указание кластера, пользователя и пространства имен)|
+|`current-context`|Активный контекст, на который направляются команды `kubectl`|
+|`users`|Учетные данные и сертификаты для аутентификации пользователей|
 
-### Просмотр логов
+### Просмотр логов контейнера
 
 ```bash
-# Сначала получим имя Pod'а
+# Автоматическое извлечение имени Pod'а
 POD_NAME=$(kubectl get pods -l app=hello-node -o jsonpath='{.items[0].metadata.name}')
 echo "Pod name: $POD_NAME"
 
-# Теперь посмотрим логи
-kubectl logs $POD_NAME
+# Чтение логов процесса
+kubectl logs "$POD_NAME"
 ```
 
-**Ожидаемый результат**:
+Ожидаемый результат:
+
 ```
 I0911 09:19:26.677397       1 log.go:195] Started HTTP server on port 8080
 I0911 09:19:26.677587       1 log.go:195] Started UDP server on port  8081
 ```
 
-### ✅ Чек-лист шага 3
+### Контрольный чек-лист шага
 
-- [x] Deployment создан (`kubectl get deployments` показывает `hello-node`)
-- [x] Pod запущен (`kubectl get pods` показывает `Running`)
-- [x] События видны (`kubectl get events`)
-- [x] Логи доступны (`kubectl logs <pod-name>`)
+- Объект Deployment успешно сформирован.
+- Pod находится в статусе `Running`.
+- События жизненного цикла подтверждены через `kubectl get events`.
+- Логи приложения доступны для чтения.
 
 ---
+## Создание объекта Service
 
-## 🌐 Шаг 4: Создание Service
+### Проблема сетевой адресации
 
-### Проблема
+Каждый Pod получает изолированный внутренний IP-адрес внутри сети кластера (например, `10.244.0.5`), немаршрутизируемый из внешней среды. При динамическом пересоздании Pod'а его IP-адрес меняется.
 
-Pod имеет внутренний IP (например, `10.244.0.5`), который недоступен извне кластера. Как получить доступ к приложению?
+### Назначение абстракции Service
 
-### Решение: Service
+Объект Service предоставляет статическую точку входа (ClusterIP) и организует проксирование и балансировку сетевого трафика на группу Pod'ов с помощью селекторов меток.
 
-Service создаёт стабильную точку входа (ClusterIP) и может экспортировать Pod наружу.
-
-### Команда
+### Команда экспонирования
 
 ```bash
 kubectl expose deployment hello-node \
@@ -359,124 +431,122 @@ kubectl expose deployment hello-node \
   --port=8080
 ```
 
-### Разбор команды
+### Структура параметров команды
 
-| Часть | Что делает |
-|-------|------------|
-| `kubectl expose deployment` | Создаёт Service для Deployment |
-| `hello-node` | Имя Deployment (Service будет направлять трафик на его Pod'ы) |
-| `--type=LoadBalancer` | Тип Service (LoadBalancer, NodePort, ClusterIP) |
-| `--port=8080` | Порт, который будет слушать Service |
+|**Параметр**|**Назначение**|
+|---|---|
+|`kubectl expose deployment`|Инициализация создания объекта Service для указанного Deployment|
+|`hello-node`|Имя целевого объекта Deployment|
+|`--type=LoadBalancer`|Тип создаваемого сервиса (`ClusterIP`, `NodePort`, `LoadBalancer`)|
+|`--port=8080`|Сетевой порт, публично прослушиваемый сервисом|
 
-### Что происходит?
+### Последовательность сетевой настройки
 
-1. Создаётся Service `hello-node`
-2. Service получает ClusterIP (например, `10.108.144.78`)
-3. Service находит Pod'ы с лейблом `app=hello-node` (автоматически от Deployment)
-4. kube-proxy настраивает правила iptables для маршрутизации трафика
+1. Создается объект Service с именем `hello-node`.
+2. Сервису выделяется внутренний IP-адрес из подсети ClusterIP.
+3. Сервис связывается с Pod'ами, имеющими метку `app=hello-node`.
+4. Системный компонент `kube-proxy` настраивает правила маршрутизации (iptables/IPVS) на узлах.
 
-### Проверка Service
+### Проверка параметров Service
 
 ```bash
 kubectl get services
 ```
 
-**Ожидаемый результат**:
-```
+Ожидаемый результат:
+
+```bash
 NAME         TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
 hello-node   LoadBalancer   10.108.144.78   <pending>     8080:30369/TCP   21s
 kubernetes   ClusterIP      10.96.0.1       <none>        443/TCP          23m
 ```
 
-### Разбор колонок
+### Расшифровка столбцов вывода Service
 
-| Колонка | Что означает |
-|---------|--------------|
-| `NAME` | Имя Service |
-| `TYPE` | Тип Service (ClusterIP, NodePort, LoadBalancer, ExternalName) |
-| `CLUSTER-IP` | Внутренний IP Service (доступен только внутри кластера) |
-| `EXTERNAL-IP` | Внешний IP (для LoadBalancer в облаке) |
-| `PORT(S)` | Порт Service : порт Pod'а |
-| `AGE` | Как давно создан Service |
+|**Название столбца**|**Значение**|
+|---|---|
+|`NAME`|Уникальное имя сетевого сервиса|
+|`TYPE`|Тип публикации сервиса (`ClusterIP`, `NodePort`, `LoadBalancer`, `ExternalName`)|
+|`CLUSTER-IP`|Внутренний виртуальный IP-адрес сервиса|
+|`EXTERNAL-IP`|Внешний IP-адрес, выделяемый облачным провайдером|
+|`PORT(S)`|Соответствие внешнего порта сервиса внутреннему порту Pod'а/NodePort|
+|`AGE`|Время с момента создания сервиса|
 
-### Почему `<pending>`?
+> **Причина статуса `<pending>` в поле `EXTERNAL-IP`:** 
+> Локальная среда minikube по умолчанию не содержит внешнего облачного балансировщика нагрузки (Cloud Load Balancer). Доступ к сервису осуществляется через проксирующие команды minikube.
 
-В minikube нет настоящего cloud load balancer, поэтому `EXTERNAL-IP` остаётся `<pending>`. Но мы можем использовать `minikube service` для доступа.
-
-### Доступ к Service
+### Организация доступа к сервису
 
 ```bash
 minikube service hello-node
 ```
 
-### Что происходит?
+При выполнении данной команды открывается веб-браузер со сгенерированным адресом вида `[http://192.168.49.2:30369/](http://192.168.49.2:30369/)`.
 
-Открывается браузер с URL вида `http://192.168.49.2:30369/`, где приложение отвечает.
-
-### Если не хочешь открывать браузер
+### Извлечение URL-адреса без запуска браузера
 
 ```bash
 minikube service hello-node --url
 ```
 
-**Ожидаемый результат**:
-```
+Ожидаемый результат:
+
+```bash
 http://192.168.49.2:30369
 ```
 
-### Тестирование через curl
+### Проверка работоспособности сервиса через curl
 
 ```bash
-# Получим URL
 URL=$(minikube service hello-node --url)
-
-# Сделаем запрос
-curl $URL
+curl -s "$URL"
 ```
 
-**Ожидаемый результат**:
-```
+Ожидаемый результат:
+
+```bash
 NOW: 2024-01-15 10:30:45.123456789 +0000 UTC m=+123.456789012
 HOSTNAME: hello-node-5f76cf6ccf-br9b5
 CLIENT_VALUES: 192.168.49.1
 ```
 
-### Попробуй разные endpoints
+### Тестирование эндпоинтов приложения
 
 ```bash
-# Главная страница
-curl $URL/
+# Корневой маршрут
+curl -s "$URL/"
 
-# Shell (осторожно!)
-curl $URL/shell
+# Доступ к оболочке командной строки (производственное предупреждение)
+curl -s "$URL/shell"
 
-#任意 путь
-curl $URL/any-path
+# Произвольный маршрут
+curl -s "$URL/any-path"
 ```
 
-> ⚠️ **Предупреждение**: Endpoint `/shell` позволяет выполнять команды в контейнере. **Никогда не используй это в production!**
+>**Предупреждение по безопасности:** 
+ Эндпоинт `/shell` предоставляет возможность выполнения команд в контексте контейнера. Использование данного эндпоинта в продуктивных средах недопустимо по соображениям безопасности.
 
-### ✅ Чек-лист шага 4
+### Контрольный чек-лист шага
 
-- [x] Service создан (`kubectl get services` показывает `hello-node`)
-- [ ] Service доступен через `minikube service hello-node`
-- [x] curl возвращает ответ от приложения
+- Объект Service создан и отображается в выводе `kubectl get services`.
+- Точка входа доступна через утилиту `minikube service`.
+- Утилита `curl` получает валидный ответ от запущенного приложения.
 
 ---
+## Включение дополнения metrics-server
 
-## 🔌 Шаг 5: Включение addon metrics-server
+### Назначение аддонов minikube
 
-### Что такое addons?
+Аддоны (addons) представляют собой предконфигурированные расширения, расширяющие базовую функциональность локального кластера minikube.
 
-Minikube включает набор встроенных дополнений (addons), которые расширяют функциональность кластера.
-
-### Список addons
+### Просмотр списка доступных аддонов
 
 ```bash
 minikube addons list
 ```
 
-**Ожидаемый результат** (фрагмент):
+Ожидаемый результат (фрагмент):
+
 ```
 |---------|-------------------------------|----------|
 |  ADDON  |            PROFILE            |  STATUS  |
@@ -484,108 +554,86 @@ minikube addons list
 | ingress | minikube                      | disabled |
 | metrics-server | minikube               | disabled |
 | dashboard | minikube                    | enabled  |
-...
 ```
 
-### Включение metrics-server
+### Активация metrics-server
 
 ```bash
 minikube addons enable metrics-server
 ```
 
-**Ожидаемый результат**:
+Ожидаемый результат:
+
+```bash
+The 'metrics-server' addon is enabled
 ```
-💡  metrics-server is an addon maintained by Kubernetes.
-...
-🌟  The 'metrics-server' addon is enabled
-```
 
-### Что происходит?
+### Порядок запуска компонента
 
-1. Создаётся Deployment `metrics-server` в namespace `kube-system`
-2. Создаётся Service `metrics-server`
-3. metrics-server начинает собирать метрики CPU/memory с Pod'ов и нод
+1. В пространстве имен `kube-system` создается Deployment `metrics-server`.
+2. Создается внутренний сервис `metrics-server`.
+3. Сервис начинает регулярный сбор агрегированных метрик использования CPU и оперативной памяти с Pod'ов и узлов.
 
-### Проверка Pod'ов
+### Проверка статуса запуска Pod'а metrics-server
 
 ```bash
 kubectl get pods -n kube-system | grep metrics
 ```
 
-**Ожидаемый результат**:
-```
+Ожидаемый результат:
+
+```bash
 metrics-server-67fb648c5-xxxxx   1/1   Running   0   1m
 ```
 
-### Проверка Service
+### Проверка состояния сервиса metrics-server
 
 ```bash
 kubectl get svc -n kube-system | grep metrics
 ```
 
-**Ожидаемый результат**:
-```
+Ожидаемый результат:
+
+```bash
 metrics-server   ClusterIP   10.96.241.45   <none>   80/TCP   1m
 ```
 
-### Тестирование metrics-server
+### Запрос метрик использования ресурсов
+
+После завершения инициализации (требуется от 30 до 60 секунд) выполняется считывание показателей нагрузки:
 
 ```bash
-# Подожди 30-60 секунд, пока metrics-server соберёт данные
+# Пауза для накопления телеметрии
 sleep 30
 
-# Посмотрим использование ресурсов Pod'ами
+# Просмотр нагрузки на Pod'ы
 kubectl top pods
 
-# Посмотрим использование ресурсов нодами
+# Просмотр нагрузки на узлы кластера
 kubectl top nodes
 ```
 
-**Ожидаемый результат**:
+Ожидаемый результат:
+
 ```
 NAME                          CPU(cores)   MEMORY(bytes)
 hello-node-5f76cf6ccf-br9b5   1m           6Mi
 ```
 
-### Если видишь ошибку
-
-```
-error: Metrics API not available
-```
-
-**Решение**: подожди ещё 30-60 секунд. metrics-server нужно время на запуск и сбор данных.
+При возникновении ошибки `error: Metrics API not available` требуется повторно выждать интервал времени, необходимый компоненту для первичного сбора данных.
 
 ### Отключение metrics-server
-
 ```bash
 minikube addons disable metrics-server
 ```
 
-**Ожидаемый результат**:
-```
-🔥  metrics-server was successfully disabled
-```
-
-### ✅ Чек-лист шага 5
-
-- [x] metrics-server включён
-- [x] Pod metrics-server запущен (`kubectl get pods -n kube-system`)
-- [x] `kubectl top pods` показывает использование ресурсов
-- [x] metrics-server отключён (опционально)
-
 ---
+## Очистка ресурсов
 
-## 🧹 Шаг 6: Очистка ресурсов
-
-### Удаление Service
+### Удаление сервиса
 
 ```bash
 kubectl delete service hello-node
-```
-
-**Ожидаемый результат**:
-```
-service "hello-node" deleted
 ```
 
 ### Удаление Deployment
@@ -594,35 +642,30 @@ service "hello-node" deleted
 kubectl delete deployment hello-node
 ```
 
-**Ожидаемый результат**:
-```
-deployment.apps "hello-node" deleted
-```
+### Последовательность удаления сущностей
 
-### Что происходит?
+1. Удаляется управляющий объект Deployment.
+2. Автоматически удаляется дочерний объект ReplicaSet.
+3. Инициируется процедура корректного завершения работы Pod'ов (graceful shutdown).
+4. Удаляется объект Service.
 
-1. Deployment удаляется
-2. ReplicaSet удаляется
-3. Pod'ы.terminateруются (graceful shutdown)
-4. Service удаляется (если не удалил раньше)
-
-### Проверка
+### Проверка очистки пространства имен
 
 ```bash
 kubectl get all
 ```
 
-**Ожидаемый результат**:
-```
+Ожидаемый результат:
+
+```bash
 NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
 service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   30m
 ```
 
-> 💡 **Примечание**: Service `kubernetes` — это встроенный Service для API server. Его нельзя удалить.
+Примечание: Системный сервис `service/kubernetes` обеспечивает связь с API-сервером кластера и не подлежит удалению.
 
 ---
-
-## 🛑 Шаг 7: Остановка minikube
+## Остановка и удаление кластера minikube
 
 ### Остановка кластера
 
@@ -630,79 +673,77 @@ service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   30m
 minikube stop
 ```
 
-**Ожидаемый результат**:
-```
-✋  Stopping node "minikube"  ...
-🛑  Node "minikube" stopped.
+Ожидаемый результат:
+
+```bash
+Node "minikube" stopped.
 ```
 
-### Удаление кластера (опционально)
+### Полное удаление кластера (опционально)
 
 ```bash
 minikube delete
 ```
 
-**Ожидаемый результат**:
-```
-🔥  Deleting "minikube" in docker ...
-🔥  Deleting container "minikube" ...
-🔥  Removing /Users/.../.minikube/machines/minikube ...
-💀  Removed all traces of the "minikube" cluster.
-```
-
-> 💡 **Совет**: если планируешь продолжать обучение, не удаляй minikube — можно просто остановить и запустить снова.
-
-### ✅ Чек-лист шага 7
-
-- [x] minikube остановлен (`minikube stop`)
-- [ ] (Опционально) minikube удалён (`minikube delete`)
-
----
-
-## 🎓 Дополнительные задания (для углубления)
-
-### Задание 1: Масштабирование Deployment
+Ожидаемый результат:
 
 ```bash
-# Снова создай Deployment
+Deleting "minikube" in docker ...
+Removed all traces of the "minikube" cluster.
+```
+
+---
+## Дополнительные практические задания
+
+### Задание 1: Масштабирование объекта Deployment
+
+Императивное изменение количества реплик Pod'ов с помощью команды `kubectl scale`:
+
+```bash
+# Создание исходного Deployment
 kubectl create deployment hello-node \
   --image=registry.k8s.io/e2e-test-images/agnhost:2.53 \
   -- /agnhost netexec --http-port=8080
 
-# Масштабируй до 3 реплик
+# Масштабирование количества реплик до 3
 kubectl scale deployment hello-node --replicas=3
 
-# Проверь
+# Анализ результатов масштабирования
 kubectl get pods
 kubectl get deployment hello-node
 ```
 
-**Вопрос**: сколько Pod'ов ты видишь? Как изменился Deployment?
+> **Контрольный вопрос:**
+>  Каким образом изменилось количество активных Pod'ов и статус объекта ReplicaSet?
 
-### Задание 2: Rolling Update
+### Задание 2: Проведение поэтапного обновления (Rolling Update)
+
+Обновление версии используемого контейнерного образа без остановки сервиса:
 
 ```bash
-# Обнови образ (используем другой тег)
+# Назначение нового образа контейнера
 kubectl set image deployment/hello-node \
   agnhost=registry.k8s.io/e2e-test-images/agnhost:2.54
 
-# Проверь статус rollout
+# Отслеживание статуса обновления
 kubectl rollout status deployment/hello-node
 
-# Посмотри историю
+# Просмотр истории версий развертывания
 kubectl rollout history deployment/hello-node
 
-# Откати
+# Откат изменения к предыдущему состоянию
 kubectl rollout undo deployment/hello-node
 ```
 
-**Вопрос**: что произошло с Pod'ами во время update? Как работает rolling update?
+>**Контрольный вопрос:**
+ Каков алгоритм ротации Pod'ов при использовании стратегии RollingUpdate?
 
-### Задание 3: Declarative подход
+### Задание 3: Применение декларативного подхода (Declarative Management)
+
+Создание и применение манифеста конфигурации на базе YAML:
 
 ```bash
-# Создай файл deployment.yaml
-cat > deployment.yaml <<EOF
+cat <<EOF > deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -721,121 +762,90 @@ spec:
       - name: agnhost
         image: registry.k8s.io/e2e-test-images/agnhost:2.53
         command: ["/agnhost"]
-        args: [netexec", "--http-port=8080"]
+        args: ["netexec", "--http-port=8080"]
         ports:
         - containerPort: 8080
 EOF
 
-# Примени
+# Декларативное применение конфигурации
 kubectl apply -f deployment.yaml
 
-# Проверь
+# Проверка результатов
 kubectl get deployment hello-node
 kubectl get pods
 ```
 
-**Вопрос**: в чём разница между `kubectl create` и `kubectl apply`?
+>**Контрольный вопрос:** 
+>В чем заключаются принципиальные архитектурные различия между командами `kubectl create` и `kubectl apply`?
 
-### Задание 4: Service разных типов
+### Задание 4: Экспонирование через Service типа NodePort
 
 ```bash
-# Создай Service типа NodePort
+# Создание сервиса типа NodePort
 kubectl expose deployment hello-node \
   --type=NodePort \
   --port=8080 \
   --name=hello-node-nodeport
 
-# Проверь
+# Проверка параметров
 kubectl get svc hello-node-nodeport
 
-# Получи URL
+# Извлечение URL
 minikube service hello-node-nodeport --url
 ```
 
-**Вопрос**: в чём разница между LoadBalancer и NodePort?
+>**Контрольный вопрос:** 
+>В чем заключаются отличия между типами сервисов NodePort и LoadBalancer на уровне маршрутизации трафика?
 
-### Задание 5: Просмотр деталей
+### Задание 5: Инспекция объектов кластера
 
 ```bash
-# Детальная информация о Deployment
+# Детальный анализ Deployment
 kubectl describe deployment hello-node
 
-# Детальная информация о Pod
-kubectl describe pod <pod-name>
+# Получение имени Pod'а и его детальный анализ
+POD_NAME=$(kubectl get pods -l app=hello-node -o jsonpath='{.items[0].metadata.name}')
+kubectl describe pod "$POD_NAME"
 
-# Детальная информация о Service
+# Детальный анализ Service
 kubectl describe service hello-node
 
-# YAML манифест Deployment
+# Вывод полной спецификации в формате YAML
 kubectl get deployment hello-node -o yaml
 ```
 
-**Вопрос**: что ты узнал нового из `describe` и `-o yaml`?
+## Сводный чек-лист выполнения практики
+
+### Базовый уровень
+
+-  Инициализация кластера `minikube start`
+-  Проверка статуса `minikube status`
+-  Создание развертывания `kubectl create deployment`
+-  Инспекция списка Pod'ов `kubectl get pods`
+-  Мониторинг системных событий `kubectl get events`
+-  Извлечение логов контейнера `kubectl logs`
+-  Создание сетевого сервиса `kubectl expose`
+-  Проверка сетевой доступности `minikube service`
+-  Активация дополнения `minikube addons enable metrics-server`
+-  Считывание показателей `kubectl top pods`
+-  Корректное удаление ресурсов `kubectl delete`
+-  Остановка виртуальной среды `minikube stop`
+
+### Углубленный уровень
+
+-  Выполнение масштабирования `kubectl scale`
+-  Проведение обновлений `kubectl set image` и отката `kubectl rollout undo`
+-  Применение декларативных файлов спецификаций `kubectl apply -f`
+-  Создание и проверка работы Service типа `NodePort`
+-  Глубокий анализ спецификаций с помощью `kubectl describe` и вывода `-o yaml`
+
 
 ---
+## Ключевые выводы
 
-## 📊 Итоговый чек-лист практики
-
-### Базовые навыки
-
-- [ ] Запустил minikube (`minikube start`)
-- [ ] Проверил статус (`minikube status`)
-- [ ] Создал Deployment (`kubectl create deployment`)
-- [ ] Посмотрел Pod'ы (`kubectl get pods`)
-- [ ] Посмотрел события (`kubectl get events`)
-- [ ] Посмотрел логи (`kubectl logs`)
-- [ ] Создал Service (`kubectl expose`)
-- [ ] Получил доступ к Service (`minikube service`)
-- [ ] Включил addon (`minikube addons enable`)
-- [ ] Проверил метрики (`kubectl top pods`)
-- [ ] Очистил ресурсы (`kubectl delete`)
-- [ ] Остановил minikube (`minikube stop`)
-
-### Дополнительные задания
-
-- [ ] Масштабировал Deployment (`kubectl scale`)
-- [ ] Сделал rolling update (`kubectl set image`)
-- [ ] Откатил rollout (`kubectl rollout undo`)
-- [ ] Применил декларативный манифест (`kubectl apply -f`)
-- [ ] Создал Service типа NodePort
-- [ ] Посмотрел детали через `describe` и `-o yaml`
-
----
-
-## 🔗 Связь с теорией
-
-| Что сделал | Где в теории |
-|------------|--------------|
-| Создал Deployment | [[02.deployaments]] |
-| Посмотрел Pod'ы | [[01.pod]], [[02.pod_lifecycle]] |
-| Создал Service | [[02.service]] |
-| Посмотрел события | [[03.pod_conditions]] |
-| Включил metrics-server | [[03.observability]] |
-| Сделал rolling update | [[02.deployaments]] (секция про updates) |
-| Применил YAML | [[02.object_management]] |
-
----
-
-## 💡 Что ты узнал
-
-1. **Deployment** — это способ управлять Pod'ами (создание, масштабирование, обновление)
-2. **Pod** — минимальная единица деплоя, содержит один или несколько контейнеров
-3. **Service** — стабильная точка входа для Pod'ов (ClusterIP, NodePort, LoadBalancer)
-4. **kubectl** — основной инструмент для работы с K8s (create, get, describe, logs, delete)
-5. **minikube** — локальный кластер для обучения и разработки
-6. **addons** — дополнения для расширения функциональности (metrics-server, dashboard, ingress)
-
----
-
-## 🎯 Что дальше?
-
-После этой практики ты готов к:
-
-1. **Практике 2**: Declarative подход — создание YAML манифестов
-2. **Практике 3**: Работа с ConfigMap и Secret
-3. **Практике 4**: NetworkPolicy — настройка сетевых правил
-4. **Практике 5**: HPA — автомасштабирование по CPU/memory
-
-Или вернись к **Уровню 1: База** в roadmap и продолжай изучать теорию.
-
----
+1. **Deployment** — управляющая абстракция высокого уровня, декларирующая состояние ReplicaSet и Pod'ов, а также отвечающая за процедуру обновления и масштабирования.
+2. **Pod** — базовая единичная абстракция Kubernetes, объединяющая один или несколько контейнеров с общим сетевым стеком и томами.
+3. **Service** — абстракция сетевой адресации, обеспечивающая постоянную точку входа и балансировку трафика между Pod'ами.
+4. **kubectl** — основной CLI-инструмент управления, взаимодействующий с REST API сервером Kubernetes.
+5. **minikube** — утилита развертывания одноузлового кластера Kubernetes для целей разработки и тестирования.
+6. **addons** — модульные системы расширения базового функционала кластера.

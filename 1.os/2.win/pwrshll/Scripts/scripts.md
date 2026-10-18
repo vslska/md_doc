@@ -1,4 +1,5 @@
 ## Убиваем неактивных пользователей
+
 ```powershell
 # 1. Получаем данные текущей сессии
 $mySessionId = [System.Diagnostics.Process]::GetCurrentProcess().SessionId

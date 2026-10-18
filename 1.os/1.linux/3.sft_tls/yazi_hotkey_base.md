@@ -1,5 +1,7 @@
 # Yazi hotkey (base)
 ---
+## Содержание
+
 1. [[#Навигация|Навигация]]
 2. [[#Файловые операции|Файловые операции]]
 3. [[#Копировать пути|Копировать пути]]
@@ -31,8 +33,6 @@
 | `z`               | [Перейдите](https://yazi-rs.github.io/docs/configuration/keymap#mgr.cd) в каталог или [отобразите](https://yazi-rs.github.io/docs/configuration/keymap#mgr.reveal) файл с помощью fzf.                                  |
 | `Z`               | [Скопируйте файл](https://yazi-rs.github.io/docs/configuration/keymap#mgr.cd) в каталог с помощью zoxide.                                                                                                               |
 | g⇒ Space          | [Перейдите](https://yazi-rs.github.io/docs/configuration/keymap#mgr.cd) в нужную директорию или [отобразите](https://yazi-rs.github.io/docs/configuration/keymap#mgr.reveal) файл через интерактивную командную строку. |
-
----
 
 Для выбора файлов и каталогов доступны следующие команды.
 
@@ -148,5 +148,3 @@ _Наблюдение: ,⇒ aуказывает на нажатие ,снача�
 | `{`                | Поменять местами текущую и предыдущую вкладку |
 | `}`                | Поменять местами текущую и следующую вкладку  |
 | `Ctrl`+ `c`        | Закрыть текущую вкладку                       |
-
----
