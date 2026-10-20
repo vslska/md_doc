@@ -814,6 +814,7 @@ kubectl describe service hello-node
 kubectl get deployment hello-node -o yaml
 ```
 
+---
 ## Сводный чек-лист выполнения практики
 
 ### Базовый уровень
