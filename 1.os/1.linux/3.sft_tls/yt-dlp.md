@@ -608,3 +608,18 @@ yt-dlp \
 - [README с параметрами командной строки](https://github.com/yt-dlp/yt-dlp#usage-and-options)
 - [Wiki / FAQ](https://github.com/yt-dlp/yt-dlp/wiki/FAQ)
 - [Документация FFmpeg](https://ffmpeg.org/documentation.html)
+
+---
+
+## Other
+
+### Скачиванеи сидео для старых телеков
+
+```bash
+ yt-dlp -f "bv*[vcodec^=avc1][height<=1080]+ba[ext=m4a]/b[ext=mp4]" --merge-output-format mp4 -a link.txt
+```
+
+- **`bv*[vcodec^=avc1]`**: Ищет лучшее видео (`bv*`), зашифрованное строго кодеком **H.264 (avc1)**.
+- **`[height<=1080]`**: Ограничивает разрешение планкой **1080p**. Если на YouTube есть версия 4K, скрипт проигнорирует её и скачает отличную Full HD версию, сэкономив место.
+- **`+ba[ext=m4a]`**: Находит лучшее аудио в формате **AAC** (контейнер M4A).
+- **`--merge-output-format mp4`**: Склеивает скачанные видео и звук в один чистый **MP4** файл без потери качества.
